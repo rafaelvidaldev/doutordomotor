@@ -1,6 +1,7 @@
 import './style.css';
 import { CAUSES, SYMPTOMS, TYPES, GRAV, PLACA, CHECK, MAQUINAS, TERMOS } from './data/knowledgeBase.js';
 import { mascot, boltIco } from './components/mascot.js';
+import { parsePlateText } from './utils/plateParser.js';
 
 /* ---------- Estado da Aplicação ---------- */
 const S = {
@@ -17,7 +18,17 @@ const S = {
   // Calculadora de Extensão
   distM: 50,
   fioMm: 2.5,
-  potCv: 2
+  potCv: 2,
+  // Scanner de Placa (OCR)
+  scanner: {
+    status: "idle", // 'idle' | 'processing' | 'success' | 'empty' | 'error'
+    previewUrl: null,
+    progress: 0,
+    stepMsg: "",
+    detected: null,
+    rawText: "",
+    errMsg: ""
+  }
 };
 
 const $app = document.getElementById("app");
@@ -415,21 +426,300 @@ function viewRoca() {
   </div>`;
 }
 
+function escapeHtml(str) {
+  return (str || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function preprocessImage(img, maxDim = 1200) {
+  let w = img.naturalWidth || img.width;
+  let h = img.naturalHeight || img.height;
+  if (w > maxDim || h > maxDim) {
+    if (w > h) {
+      h = Math.round((h * maxDim) / w);
+      w = maxDim;
+    } else {
+      w = Math.round((w * maxDim) / h);
+      h = maxDim;
+    }
+  }
+  const canvas = document.createElement("canvas");
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(img, 0, 0, w, h);
+
+  try {
+    const imgData = ctx.getImageData(0, 0, w, h);
+    const d = imgData.data;
+    for (let i = 0; i < d.length; i += 4) {
+      const gray = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+      const contrasted = Math.min(255, Math.max(0, (gray - 128) * 1.35 + 128));
+      d[i] = contrasted;
+      d[i + 1] = contrasted;
+      d[i + 2] = contrasted;
+    }
+    ctx.putImageData(imgData, 0, 0);
+  } catch (e) {
+    console.warn("Aviso ao aplicar contraste no canvas:", e);
+  }
+  return canvas;
+}
+
+function resetScanner() {
+  if (S.scanner.previewUrl) {
+    try { URL.revokeObjectURL(S.scanner.previewUrl); } catch (e) {}
+  }
+  S.scanner.status = "idle";
+  S.scanner.previewUrl = null;
+  S.scanner.progress = 0;
+  S.scanner.stepMsg = "";
+  S.scanner.detected = null;
+  S.scanner.rawText = "";
+  S.scanner.errMsg = "";
+  render(true);
+}
+
+async function runPlateOCR(file) {
+  if (!file) return;
+
+  const objectUrl = URL.createObjectURL(file);
+  S.scanner.status = "processing";
+  S.scanner.previewUrl = objectUrl;
+  S.scanner.progress = 10;
+  S.scanner.stepMsg = "Carregando foto e preparando...";
+  S.scanner.detected = null;
+  S.scanner.rawText = "";
+  S.scanner.errMsg = "";
+  render(true);
+
+  try {
+    // 1. Carrega imagem e pré-processa
+    const img = new Image();
+    await new Promise((resolve, reject) => {
+      img.onload = resolve;
+      img.onerror = () => reject(new Error("Falha ao abrir a foto da placa."));
+      img.src = objectUrl;
+    });
+
+    const preprocessedCanvas = preprocessImage(img);
+
+    S.scanner.progress = 25;
+    S.scanner.stepMsg = "Iniciando leitor óptico...";
+    render(true);
+
+    // 2. Importação dinâmica do Tesseract.js (mantém o bundle inicial leve)
+    const { recognize } = await import("tesseract.js");
+
+    S.scanner.progress = 35;
+    S.scanner.stepMsg = "Lendo texto da chapa metálica...";
+    render(true);
+
+    const res = await recognize(preprocessedCanvas, "por+eng", {
+      logger: m => {
+        if (m.status === "recognizing text") {
+          const p = Math.round((m.progress || 0) * 100);
+          S.scanner.progress = 35 + Math.round((m.progress || 0) * 60);
+          S.scanner.stepMsg = `Lendo chapa metálica... ${p}%`;
+          const pText = document.getElementById("ocr-step-msg");
+          if (pText) pText.textContent = S.scanner.stepMsg;
+          const pBar = document.getElementById("ocr-progress-bar");
+          if (pBar) pBar.style.width = `${S.scanner.progress}%`;
+        }
+      }
+    });
+
+    const rawText = res?.data?.text || "";
+    const detected = parsePlateText(rawText);
+
+    if (Object.keys(detected).length > 0) {
+      S.scanner.status = "success";
+      S.scanner.detected = detected;
+      S.scanner.rawText = rawText;
+      // Seleciona o primeiro campo detectado para exibir imediatamente a explicação
+      const firstKey = detected[Object.keys(detected)[0]].key;
+      S.placaField = firstKey;
+      toast("Placa lida com sucesso!");
+    } else {
+      S.scanner.status = "empty";
+      S.scanner.detected = null;
+      S.scanner.rawText = rawText;
+    }
+  } catch (err) {
+    console.error("Erro no OCR:", err);
+    S.scanner.status = "error";
+    S.scanner.errMsg = err?.message || "Não foi possível ler a imagem.";
+  }
+
+  render(true);
+}
+
 /* ---------- SKILL: Ler a Placa do Motor ---------- */
 function viewPlaca() {
   const f = PLACA.find(p => p.k === S.placaField);
+  const sc = S.scanner;
+
+  let scannerHtml = "";
+
+  if (sc.status === "idle") {
+    scannerHtml = `
+    <div class="scanner-card">
+      <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px">
+        <div style="font-size:2.2rem; line-height:1">📸</div>
+        <div>
+          <h2 class="display" style="font-size:1.35rem">Leitor de Placa Inteligente</h2>
+          <p style="margin:2px 0 0; font-size:.92rem; color:var(--on-bg-soft)">Tire uma foto da chapa de metal do seu motor que o Doutor lê os dados pra você!</p>
+        </div>
+      </div>
+      <button class="btn btn-yellow btn-big" data-act="trigger-camera" style="width:100%">
+        <span class="ico" aria-hidden="true">📷</span>
+        <span class="t">Tirar foto da placa</span>
+      </button>
+      <p style="text-align:center; font-size:.85rem; color:var(--on-bg-soft); margin:8px 0 0">
+        Abre a câmera do celular ou permite escolher uma foto da galeria.
+      </p>
+    </div>`;
+  } else if (sc.status === "processing") {
+    scannerHtml = `
+    <div class="scanner-card">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px">
+        <div class="scanner-badge pulse">⚡ Analisando Placa...</div>
+        <span style="font-size:.85rem; font-weight:700">${sc.progress}%</span>
+      </div>
+
+      <div class="scanner-viewfinder">
+        <div class="viewfinder-corners">
+          <span class="viewfinder-corner-tr"></span>
+          <span class="viewfinder-corner-bl"></span>
+        </div>
+        <div class="scanner-laser"></div>
+        <img class="scanner-img" src="${sc.previewUrl}" alt="Foto da placa em análise">
+      </div>
+
+      <div class="progress" style="margin:10px 0 8px">
+        <span id="ocr-progress-bar" style="width:${sc.progress}%; background:var(--green)"></span>
+      </div>
+
+      <p id="ocr-step-msg" style="text-align:center; font-weight:700; font-size:.95rem; margin:6px 0 2px">
+        ${sc.stepMsg || "Processando chapa metálica..."}
+      </p>
+      <p style="text-align:center; font-size:.82rem; color:var(--on-bg-soft); margin:0">
+        Aguarde alguns segundos enquanto a inteligência óptica examina os números.
+      </p>
+    </div>`;
+  } else if (sc.status === "success") {
+    const keys = Object.keys(sc.detected || {});
+    scannerHtml = `
+    <div class="scanner-card">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px">
+        <div class="scanner-badge success">✅ ${keys.length} dados identificados!</div>
+        <button class="iconbtn" data-act="reset-scanner" title="Fechar ou tirar outra foto" style="font-size:.95rem; width:34px; height:34px">✕</button>
+      </div>
+
+      <p style="margin:0 0 10px; font-size:.92rem; color:var(--on-bg-soft)">
+        Toque em qualquer dado lido para ver a explicação detalhada abaixo:
+      </p>
+
+      <div class="detected-grid">
+        ${keys.map(k => {
+          const item = sc.detected[k];
+          const isSel = S.placaField === item.key;
+          return `
+          <button class="detected-item ${isSel ? "active" : ""}" data-act="field" data-k="${item.key}">
+            <div class="item-info">
+              <span class="item-lbl">${item.label}</span>
+              <span class="item-val">${item.val}</span>
+            </div>
+            <span class="item-ico">${item.ico}</span>
+          </button>`;
+        }).join("")}
+      </div>
+
+      <div style="display:flex; gap:8px; margin-top:10px">
+        <button class="btn btn-yellow" data-act="trigger-camera" style="flex:1; padding:8px 12px; font-size:.95rem">
+          <span class="ico">📸</span><span><span class="t">Tirar outra foto da placa</span></span>
+        </button>
+      </div>
+
+      <details class="hint" style="margin-top:12px">
+        <summary>Ver texto bruto detectado pelo scanner</summary>
+        <div class="in">
+          <div class="ocr-raw-box">${escapeHtml(sc.rawText) || "Nenhum texto visível."}</div>
+        </div>
+      </details>
+    </div>`;
+  } else if (sc.status === "empty") {
+    scannerHtml = `
+    <div class="scanner-card">
+      <div style="display:flex; gap:12px; align-items:center; margin-bottom:12px">
+        ${mascot("worried", "sm")}
+        <div>
+          <h2 class="display" style="font-size:1.25rem">Não conseguimos ler os dados</h2>
+          <p style="margin:2px 0 0; font-size:.9rem; color:var(--on-bg-soft)">A foto pode ter ficado escura, com reflexo ou fora de foco.</p>
+        </div>
+      </div>
+
+      <div class="card note" style="padding:10px 12px; margin-bottom:12px; font-size:.88rem">
+        <p style="margin:0 0 6px"><strong>💡 Dicas para a leitura funcionar:</strong></p>
+        <p style="margin:0 0 4px">• Limpe a poeira e a graxa da placa com um pano seco.</p>
+        <p style="margin:0 0 4px">• Ligue a lanterna do celular para destacar os números gravados no metal.</p>
+        <p style="margin:0">• Aproxime a câmera e enquadre a plaqueta de frente, sem inclinar.</p>
+      </div>
+
+      <div style="display:flex; gap:8px">
+        <button class="btn btn-yellow btn-big" data-act="trigger-camera" style="flex:1">
+          <span class="ico">📷</span><span class="t">Tentar outra foto</span>
+        </button>
+        <button class="btn" data-act="reset-scanner" style="flex:1">
+          <span class="t">Fechar</span>
+        </button>
+      </div>
+    </div>`;
+  } else if (sc.status === "error") {
+    scannerHtml = `
+    <div class="scanner-card">
+      <div style="display:flex; gap:12px; align-items:center; margin-bottom:12px">
+        ${mascot("danger", "sm")}
+        <div>
+          <h2 class="display" style="font-size:1.25rem">Ocorreu um problema no leitor</h2>
+          <p style="margin:2px 0 0; font-size:.9rem; color:var(--red)">${escapeHtml(sc.errMsg) || "Não foi possível carregar a imagem."}</p>
+        </div>
+      </div>
+      <button class="btn btn-yellow" data-act="trigger-camera" style="width:100%">
+        <span class="ico">🔄</span><span class="t">Tentar novamente</span>
+      </button>
+    </div>`;
+  }
+
+  const detectedKeys = sc.detected ? Object.values(sc.detected).map(v => v.key) : [];
+
   return `
   <h1 class="display" tabindex="-1">Ler a Placa do Motor</h1>
-  <p class="lead">Toda placa de motor traz esses dados padronizados. Toque em qualquer campo para entender:</p>
+  <p class="lead">Toda placa de motor traz esses dados padronizados. Tire uma foto da placa ou toque nos campos abaixo:</p>
+
+  ${scannerHtml}
+
+  <input type="file" id="plate-photo-input" accept="image/*" capture="environment" style="display:none">
+
+  <h2 class="display" style="font-size:1.3rem; margin:22px 0 10px">Placa Interativa Padrão</h2>
   <div class="placa">
     <span class="screw tl"></span><span class="screw tr"></span>
     <span class="screw bl"></span><span class="screw br"></span>
     <p class="placa-brand">MOTOR DE INDUÇÃO TRIFÁSICO</p>
     <div class="fields">
-      ${PLACA.map(p => `<button class="field ${S.placaField === p.k ? "on" : ""}" data-act="field" data-k="${p.k}" aria-pressed="${S.placaField === p.k}">${p.k}</button>`).join("")}
+      ${PLACA.map(p => {
+        const isDetected = detectedKeys.includes(p.k);
+        const isOn = S.placaField === p.k;
+        return `<button class="field ${isOn ? "on" : ""} ${isDetected ? "has-detected" : ""}" data-act="field" data-k="${p.k}" aria-pressed="${isOn}">${p.k}</button>`;
+      }).join("")}
     </div>
   </div>
-  <div class="card explain">
+
+  <div class="card explain" id="placa-explain">
     ${f ? `<h3 class="display">${f.t}</h3><p>${f.d}</p>` : `<h3 class="display">Toque num número da placa</h3><p class="muted">A explicação simples e para que serve aparece aqui sem recarregar a tela.</p>`}
   </div>`;
 }
@@ -632,8 +922,17 @@ document.addEventListener("click", e => {
   else if (a === "field") {
     S.placaField = b.dataset.k;
     render(true);
+    const expl = document.getElementById("placa-explain");
+    if (expl) expl.scrollIntoView({ behavior: "smooth", block: "nearest" });
     const x = $app.querySelector(`.field[data-k="${CSS.escape(S.placaField)}"]`);
     if (x) x.focus();
+  }
+  else if (a === "trigger-camera") {
+    const inp = document.getElementById("plate-photo-input");
+    if (inp) inp.click();
+  }
+  else if (a === "reset-scanner") {
+    resetScanner();
   }
   else if (a === "resetchk") { saveChecks({}); render(true); toast("Checklist zerado!"); }
   else if (a === "set-rpm") { S.rpmMotor = +b.dataset.v; render(true); }
@@ -651,6 +950,11 @@ document.addEventListener("input", e => {
 
 document.addEventListener("change", e => {
   const el = e.target;
+  if (el.id === "plate-photo-input" && el.files && el.files[0]) {
+    runPlateOCR(el.files[0]);
+    el.value = "";
+    return;
+  }
   if (el.dataset && el.dataset.act === "chk") {
     const st = loadChecks();
     st[el.dataset.k] = el.checked;

@@ -734,6 +734,236 @@ details .in p {
   margin: 0;
 }
 
+/* ============================================================
+   SCANNER DE PLACA DO MOTOR (OCR)
+   ============================================================ */
+.scanner-card {
+  background: var(--surface);
+  border: 3px solid var(--line);
+  border-radius: 16px;
+  box-shadow: 4px 4px 0 var(--shadow);
+  padding: 18px 16px;
+  margin-bottom: 24px;
+}
+
+.scanner-viewfinder {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  max-height: 270px;
+  background: #0f172a;
+  border: 3px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 14px 0 10px;
+}
+
+.scanner-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: contrast(1.1) brightness(0.95);
+  display: block;
+}
+
+.scanner-laser {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: linear-gradient(90deg, transparent, #00FF87, #60EFFF, #00FF87, transparent);
+  box-shadow: 0 0 16px 5px rgba(0, 255, 135, 0.8), 0 0 4px #60EFFF;
+  animation: laserScan 2.2s ease-in-out infinite;
+  z-index: 5;
+}
+
+@keyframes laserScan {
+  0% { top: 4%; opacity: 0.6; }
+  50% { top: 92%; opacity: 1; }
+  100% { top: 4%; opacity: 0.6; }
+}
+
+.viewfinder-corners {
+  position: absolute;
+  inset: 12px;
+  pointer-events: none;
+  z-index: 6;
+}
+
+.viewfinder-corners::before,
+.viewfinder-corners::after {
+  content: '';
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border-color: #60EFFF;
+  border-style: solid;
+}
+
+.viewfinder-corners::before {
+  top: 0;
+  left: 0;
+  border-width: 3.5px 0 0 3.5px;
+}
+
+.viewfinder-corners::after {
+  bottom: 0;
+  right: 0;
+  border-width: 0 3.5px 3.5px 0;
+}
+
+.viewfinder-corner-tr {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 22px;
+  height: 22px;
+  border-top: 3.5px solid #60EFFF;
+  border-right: 3.5px solid #60EFFF;
+}
+
+.viewfinder-corner-bl {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 22px;
+  height: 22px;
+  border-bottom: 3.5px solid #60EFFF;
+  border-left: 3.5px solid #60EFFF;
+}
+
+.scanner-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: var(--yellow);
+  border: 2px solid var(--line);
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.scanner-badge.success {
+  background: var(--green);
+}
+
+.scanner-badge.pulse {
+  animation: pulse 1.6s ease-in-out infinite;
+}
+
+.detected-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin: 14px 0 10px;
+}
+
+@media (max-width: 440px) {
+  .detected-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.detected-item {
+  background: #FFFDF0;
+  border: 2.5px solid var(--line);
+  border-radius: 10px;
+  box-shadow: 2.5px 2.5px 0 var(--shadow);
+  padding: 10px 12px;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.08s, background 0.08s, box-shadow 0.08s;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.detected-item:hover, .detected-item:focus-visible {
+  background: var(--cream);
+  outline: none;
+}
+
+.detected-item:active {
+  transform: translate(2px, 2px);
+  box-shadow: 0 0 0;
+}
+
+.detected-item.active {
+  background: var(--yellow);
+  box-shadow: 3px 3px 0 var(--shadow);
+  border-color: #000;
+}
+
+.detected-item .item-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.detected-item .item-lbl {
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.detected-item .item-val {
+  font-family: 'Lilita One', Arial, sans-serif;
+  font-size: 1.25rem;
+  color: #000;
+  line-height: 1.15;
+  margin-top: 2px;
+}
+
+.detected-item .item-ico {
+  font-size: 1.4rem;
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+
+.ocr-raw-box {
+  background: #f8fafc;
+  border: 2px dashed #94a3b8;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-family: monospace;
+  font-size: 0.8rem;
+  color: #334155;
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 140px;
+  overflow-y: auto;
+  margin-top: 8px;
+}
+
+.field.has-detected {
+  border-color: #000;
+  position: relative;
+}
+
+.field.has-detected::after {
+  content: '✓';
+  position: absolute;
+  top: -7px;
+  right: -7px;
+  background: var(--green);
+  border: 2px solid #000;
+  border-radius: 50%;
+  width: 19px;
+  height: 19px;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 15px;
+  text-align: center;
+  box-shadow: 1px 1px 0 #000;
+}
+
 /* calculadora de polias animada */
 .pulley-canvas {
   width: 100%;
