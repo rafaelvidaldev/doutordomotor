@@ -783,28 +783,36 @@ function viewPolias(){
 /* ---------- SKILL: Teste de Extensão da Roça (Voltímetro Animado) ---------- */
 function viewExtensao(){
   // Calculo simplificado de queda de tensao em 220V cobre
-  // I aproximada = potCv * 4 A (em 220V)
-  const I = S.potCv * 4;
+  // Corrente tipica de motor monofasico 220V com rendimento e FP reais = 5.5 A por cv
+  const I = S.potCv * 5.5;
   // Resistencia cobre = 0.0178 * L * 2 / S
   const R = (0.0178 * S.distM * 2) / S.fioMm;
   const quedaV = Math.round(I * R);
   const vFinal = Math.max(120, 220 - quedaV);
   const percQueda = ((quedaV / 220) * 100).toFixed(1);
 
-  // Angulo do voltimetro: 220V = 35deg, 180V = -35deg
-  const angulo = Math.min(45, Math.max(-55, (vFinal - 200) * 1.5));
+  // Escala NBR 5410:
+  // Verde: queda ate 4% (>= 211 V)
+  // Amarelo: queda de 4% a 7% (205 V a 210 V)
+  // Vermelho: queda > 7% (< 205 V)
   let voltCor = "var(--green)";
-  let voltMsg = "Tensão excelente! O motor trabalha frio e rende tudo o que tem.";
+  let voltMsg = "Tensão excelente! Queda dentro do limite de 4% da NBR 5410. O motor trabalha frio e rende toda a força no eixo.";
+  let voltStatus = "Normal (até 4% pela NBR 5410)";
   let voltMood = "happy";
-  if(vFinal < 195 && vFinal >= 180){
+  if(vFinal < 211 && vFinal >= 205){
     voltCor = "var(--yellow)";
-    voltMsg = "Queda perigosa! O motor vai roncar, esquentar bastante e perder força nos picos.";
+    voltMsg = "Atenção: Queda entre 4% e 7%. Aceitável no limite da norma NBR 5410, mas o motor já pode esquentar em esforço contínuo ou na partida.";
+    voltStatus = "Atenção (4% a 7% pela NBR 5410)";
     voltMood = "worried";
-  } else if(vFinal < 180){
+  } else if(vFinal < 205){
     voltCor = "var(--red)";
-    voltMsg = "Perigo de queimar! Tensão baixa demais. O enrolamento vai cozinhar o verniz.";
+    voltMsg = "Perigo de subtensão! Queda acima de 7% (reprovado pela NBR 5410). O motor vai puxar mais corrente, perder torque e superaquecer o verniz das bobinas.";
+    voltStatus = "Crítico (queda acima de 7%)";
     voltMood = "danger";
   }
+
+  // Angulo do voltimetro: 220V = 40deg, 211V = 25deg, 205V = 15deg, 160V = -60deg
+  const angulo = Math.min(42, Math.max(-62, (vFinal - 220) * 1.67 + 40));
 
   return `
   <h1 class="display" tabindex="-1">Extensão & Fio na Roça</h1>
@@ -815,16 +823,17 @@ function viewExtensao(){
       <svg class="volt-svg" viewBox="0 0 220 120" role="img" aria-label="Voltímetro analógico marcando a voltagem da ponta">
         <!-- Fundo do mostrador -->
         <path d="M 20 105 A 90 90 0 0 1 200 105 Z" fill="#FFF4C2" stroke="#000" stroke-width="4"/>
-        <!-- Faixa vermelha <185V -->
-        <path d="M 32 105 A 78 78 0 0 1 70 42" fill="none" stroke="#FF5A52" stroke-width="12"/>
-        <!-- Faixa amarela 185-205V -->
-        <path d="M 70 42 A 78 78 0 0 1 125 28" fill="none" stroke="#FFD23F" stroke-width="12"/>
-        <!-- Faixa verde >205V -->
-        <path d="M 125 28 A 78 78 0 0 1 188 105" fill="none" stroke="#4BE08B" stroke-width="12"/>
+        <!-- Faixa vermelha <205V (queda >7%) -->
+        <path d="M 32 105 A 78 78 0 0 1 130 30" fill="none" stroke="#FF5A52" stroke-width="12"/>
+        <!-- Faixa amarela 205V a 211V (queda 4% a 7%) -->
+        <path d="M 130 30 A 78 78 0 0 1 144 34" fill="none" stroke="#FFD23F" stroke-width="12"/>
+        <!-- Faixa verde >=211V (queda ate 4%) -->
+        <path d="M 144 34 A 78 78 0 0 1 170 52" fill="none" stroke="#4BE08B" stroke-width="12"/>
         <line x1="110" y1="105" x2="110" y2="30" stroke="#000" stroke-width="2" stroke-dasharray="2 3"/>
-        <text x="42" y="98" font-family="'Lilita One',Arial" font-size="11" fill="#000">160V</text>
-        <text x="110" y="24" font-family="'Lilita One',Arial" font-size="12" text-anchor="middle" fill="#000">200V</text>
-        <text x="178" y="98" font-family="'Lilita One',Arial" font-size="11" fill="#000">220V</text>
+        <text x="36" y="98" font-family="'Lilita One',Arial" font-size="11" fill="#000">&lt;180V</text>
+        <text x="108" y="24" font-family="'Lilita One',Arial" font-size="11" text-anchor="middle" fill="#000">205V</text>
+        <text x="146" y="24" font-family="'Lilita One',Arial" font-size="11" text-anchor="middle" fill="#000">211V</text>
+        <text x="178" y="66" font-family="'Lilita One',Arial" font-size="11" fill="#000">220V</text>
         <!-- Ponteiro -->
         <g class="meter-hand" style="transform:rotate(${angulo}deg)">
           <line x1="110" y1="105" x2="110" y2="36" stroke="#000" stroke-width="4" stroke-linecap="round"/>
@@ -832,7 +841,7 @@ function viewExtensao(){
         </g>
       </svg>
       <div style="font-family:'Lilita One',Arial; font-size:2.2rem; color:#000; margin-top:4px">${vFinal} Volts</div>
-      <div style="font-size:.9rem; font-weight:700; color:#444">Queda de ${quedaV} V (${percQueda}%) na ponta da máquina</div>
+      <div style="font-size:.9rem; font-weight:700; color:#444">Queda de ${quedaV} V (${percQueda}%) na ponta • ${voltStatus}</div>
     </div>
 
     <div class="slider-box">
@@ -861,7 +870,17 @@ function viewExtensao(){
     <div style="background:${voltCor}; border:3px solid var(--line); border-radius:12px; padding:12px; margin-top:14px; font-weight:700">
       ${voltMsg}
     </div>
-  </div>`;
+  </div>
+
+  <details class="hint" style="margin-top:16px">
+    <summary>O que diz a norma NBR 5410 sobre queda de tensão?</summary>
+    <div class="in">
+      <p>• <strong>Até 4% de queda (≥ 211 V):</strong> É o limite recomendado para circuitos terminais. O motor parte rápido, não perde torque e mantém a temperatura dentro do projeto.</p>
+      <p>• <strong>De 4% a 7% de queda (205 V a 210 V):</strong> Zona de atenção. Aceitável em situações no limite da norma, mas na partida ou com carga pesada o motor já vai sofrer com aquecimento extra.</p>
+      <p>• <strong>Acima de 7% de queda (< 205 V):</strong> Reprovado! O enrolamento puxa corrente excessiva para compensar a voltagem baixa. O calor queima o verniz do cobre com o tempo.</p>
+      <p>• <strong>Solução na prática:</strong> Se a distância for longa, aumente a bitola do fio (por exemplo, trocar 2,5 mm² por 6 mm² ou 10 mm²).</p>
+    </div>
+  </details>`;
 }
 
 /* ---------- SKILL: Motores da Roça e Oficina ---------- */
