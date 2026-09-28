@@ -12,12 +12,14 @@ export function mascot(mood = "happy", cls = "") {
             </g>
             <path class="sparkle" d="M178 60 L188 68 L178 76 L186 90 L172 82 Z" fill="#FFD23F" stroke="#000" stroke-width="3"/>`;
   } else {
-    face = `<circle cx="78" cy="88" r="14" fill="#fff" stroke="#000" stroke-width="4"/>
-            <circle cx="122" cy="88" r="14" fill="#fff" stroke="#000" stroke-width="4"/>
-            <circle cx="${78 + pupil[0]}" cy="${88 + pupil[1]}" r="6" fill="#000"/>
-            <circle cx="${122 + pupil[0]}" cy="${88 + pupil[1]}" r="6" fill="#000"/>
-            <circle cx="${78 + pupil[0] - 2}" cy="${88 + pupil[1] - 2}" r="2" fill="#fff"/>
-            <circle cx="${122 + pupil[0] - 2}" cy="${88 + pupil[1] - 2}" r="2" fill="#fff"/>`;
+    face = `<g class="mascot-eyes">
+              <circle cx="78" cy="88" r="14" fill="#fff" stroke="#000" stroke-width="4"/>
+              <circle cx="122" cy="88" r="14" fill="#fff" stroke="#000" stroke-width="4"/>
+              <circle class="mascot-pupil" cx="${78 + pupil[0]}" cy="${88 + pupil[1]}" r="6" fill="#000"/>
+              <circle class="mascot-pupil" cx="${122 + pupil[0]}" cy="${88 + pupil[1]}" r="6" fill="#000"/>
+              <circle cx="${78 + pupil[0] - 2}" cy="${88 + pupil[1] - 2}" r="2" fill="#fff"/>
+              <circle cx="${122 + pupil[0] - 2}" cy="${88 + pupil[1] - 2}" r="2" fill="#fff"/>
+            </g>`;
 
     if (mood === "happy") {
       face += `<circle class="blush" cx="58" cy="112" r="8" fill="#FFA3D1" stroke="#000" stroke-width="2"/>

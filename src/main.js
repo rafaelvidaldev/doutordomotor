@@ -74,30 +74,48 @@ function diagnose() {
   return { list, g, red };
 }
 
+function haptic(ms = 12) {
+  if (typeof navigator !== "undefined" && navigator.vibrate) {
+    try { navigator.vibrate(ms); } catch (e) {}
+  }
+}
+
 /* ---------- Navegação ---------- */
 function go(view) {
   S.view = view;
-  render();
+  if (document.startViewTransition && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    document.startViewTransition(() => render());
+  } else {
+    render();
+  }
 }
 
 function back() {
-  const v = S.view;
-  if (["type", "placa", "polias", "extensao", "roca", "check", "gira", "dicionario"].includes(v)) {
-    return go("home");
-  }
-  if (v === "symptom") return go("type");
-  if (v === "question") {
-    if (S.qi === 0) return go("symptom");
-    S.qi--;
-    S.answers.pop();
-    return render();
-  }
-  if (v === "result") {
-    const s = sym();
-    if (s.urgent) return go("symptom");
-    S.qi = s.qs.length - 1;
-    S.answers.pop();
-    return go("question");
+  const doBack = () => {
+    const v = S.view;
+    if (["type", "placa", "polias", "extensao", "roca", "check", "gira", "dicionario"].includes(v)) {
+      return go("home");
+    }
+    if (v === "symptom") return go("type");
+    if (v === "question") {
+      if (S.qi === 0) return go("symptom");
+      S.qi--;
+      S.answers.pop();
+      return render();
+    }
+    if (v === "result") {
+      const s = sym();
+      if (s.urgent) return go("symptom");
+      S.qi = s.qs.length - 1;
+      S.answers.pop();
+      return go("question");
+    }
+  };
+
+  if (document.startViewTransition && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    document.startViewTransition(doBack);
+  } else {
+    doBack();
   }
 }
 
@@ -105,7 +123,7 @@ function topbar() {
   const showBack = S.view !== "home";
   $top.innerHTML = `
     ${showBack ? `<button class="iconbtn" data-act="back" aria-label="Voltar">←</button>` : ""}
-    <div class="brand display"><span class="brand-dot">${boltIco}</span>Doutor do Motor</div>`;
+    <button class="brand display brand-btn" data-act="home" aria-label="Voltar para a página inicial"><span class="brand-dot">${boltIco}</span>Doutor do Motor</button>`;
 }
 
 function progress() {
@@ -994,8 +1012,10 @@ document.addEventListener("click", e => {
   const b = e.target.closest("[data-act]");
   if (!b) return;
   const a = b.dataset.act;
+  haptic(10);
 
   if (a === "back") back();
+  else if (a === "home") go("home");
   else if (a === "start") { S.type = null; S.sym = null; S.qi = 0; S.answers = []; go("type"); }
   else if (a === "go") go(b.dataset.v);
   else if (a === "type") { S.type = b.dataset.k; go("symptom"); }
