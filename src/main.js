@@ -144,19 +144,19 @@ function viewHome() {
     ${mascot("happy")}
     <h1 class="display" tabindex="-1">Seu motor tá estranho?</h1>
     <p class="lead">Ferramenta prática pro produtor rural, marceneiro e oficinas. Descubra o defeito do motor da ordenha, ensiladeira ou serra sem enrolação!</p>
-    <button class="btn btn-yellow btn-big" data-act="start"><span class="ico" aria-hidden="true">🩺</span><span class="t">Começar diagnóstico rápido</span></button>
+    <button class="btn btn-yellow btn-big" data-act="start"><span class="ico ico-pulse" aria-hidden="true">🩺</span><span class="t">Começar diagnóstico rápido</span></button>
   </section>
 
   <h2 class="section-title display">Ferramentas & Habilidades</h2>
   <p class="section-sub">Tudo o que você precisa saber pra cuidar do motor no sítio:</p>
   <div class="stack">
-    <button class="btn" data-act="go" data-v="polias"><span class="ico" aria-hidden="true">⚙️</span><span><span class="t">Casamento de polias animado</span><span class="s">Calcule o diâmetro da correia e rotação (RPM)</span></span></button>
-    <button class="btn" data-act="go" data-v="extensao"><span class="ico" aria-hidden="true">📏</span><span><span class="t">Teste de extensão da roça</span><span class="s">Veja se o fio fino tá roubando força da máquina</span></span></button>
-    <button class="btn" data-act="go" data-v="roca"><span class="ico" aria-hidden="true">🚜</span><span><span class="t">Motores da Roça e Oficina</span><span class="s">Ordenheira, resfriador, picador e estufa de fumo</span></span></button>
-    <button class="btn" data-act="go" data-v="placa"><span class="ico" aria-hidden="true">🏷️</span><span><span class="t">Ler a placa do motor</span><span class="s">O que significa cv, 220/380V, FS e IP55</span></span></button>
-    <button class="btn" data-act="go" data-v="check"><span class="ico" aria-hidden="true">🧽</span><span><span class="t">Cuidados de rotina</span><span class="s">Checklist pra ele durar mais de 20 anos</span></span></button>
-    <button class="btn" data-act="go" data-v="gira"><span class="ico" aria-hidden="true">🌀</span><span><span class="t">Como o motor gira por dentro</span><span class="s">A física da indução explicada em 1 minuto</span></span></button>
-    <button class="btn" data-act="go" data-v="dicionario"><span class="ico" aria-hidden="true">📖</span><span><span class="t">Dicionário do eletricista</span><span class="s">Tradutor de termos técnicos pra língua da roça</span></span></button>
+    <button class="btn" data-act="go" data-v="polias"><span class="ico ico-spin" aria-hidden="true">⚙️</span><span><span class="t">Casamento de polias animado</span><span class="s">Calcule o diâmetro da correia e rotação (RPM)</span></span></button>
+    <button class="btn" data-act="go" data-v="extensao"><span class="ico ico-ruler" aria-hidden="true">📏</span><span><span class="t">Teste de extensão da roça</span><span class="s">Veja se o fio fino tá roubando força da máquina</span></span></button>
+    <button class="btn" data-act="go" data-v="roca"><span class="ico ico-chug" aria-hidden="true">🚜</span><span><span class="t">Motores da Roça e Oficina</span><span class="s">Ordenheira, resfriador, picador e estufa de fumo</span></span></button>
+    <button class="btn" data-act="go" data-v="placa"><span class="ico ico-tag" aria-hidden="true">🏷️</span><span><span class="t">Ler a placa do motor</span><span class="s">O que significa cv, 220/380V, FS e IP55</span></span></button>
+    <button class="btn" data-act="go" data-v="check"><span class="ico ico-scrub" aria-hidden="true">🧽</span><span><span class="t">Cuidados de rotina</span><span class="s">Checklist pra ele durar mais de 20 anos</span></span></button>
+    <button class="btn" data-act="go" data-v="gira"><span class="ico ico-vortex" aria-hidden="true">🌀</span><span><span class="t">Como o motor gira por dentro</span><span class="s">A física da indução explicada em 1 minuto</span></span></button>
+    <button class="btn" data-act="go" data-v="dicionario"><span class="ico ico-book" aria-hidden="true">📖</span><span><span class="t">Dicionário do eletricista</span><span class="s">Tradutor de termos técnicos pra língua da roça</span></span></button>
   </div>
 
   <div class="card note" style="margin-top:30px">
@@ -190,13 +190,21 @@ function viewType() {
 }
 
 function viewSymptom() {
+  const icoMap = {
+    nao_parte: "ico-wiggle",
+    esquenta: "ico-flame",
+    disjuntor: "ico-zap",
+    fraco: "ico-crawl",
+    queimado: "ico-smoke",
+    choque: "ico-warn"
+  };
   return `${progress()}
   <div class="qhead">${mascot("thinking", "sm")}</div>
   <div class="bubble"><h2 class="display" tabindex="-1">O que está acontecendo com ele?</h2><p>Escolha o sintoma mais parecido com a lida de agora:</p></div>
   <div class="grid2">
     ${SYMPTOMS.map(s => `
       <button class="btn ${s.urgent ? "btn-pink" : ""}" data-act="sym" data-k="${s.id}">
-        <span class="ico" aria-hidden="true">${s.ico}</span><span class="t">${s.t}</span><span class="s">${s.s}</span>
+        <span class="ico ${icoMap[s.id] || "ico-pulse"}" aria-hidden="true">${s.ico}</span><span class="t">${s.t}</span><span class="s">${s.s}</span>
       </button>`).join("")}
   </div>`;
 }
@@ -428,13 +436,21 @@ function viewExtensao() {
 
 /* ---------- SKILL: Motores da Roça e Oficina ---------- */
 function viewRoca() {
+  const farmIcoClass = {
+    "🥛": "ico-slosh",
+    "❄️": "ico-frost",
+    "🌾": "ico-sway",
+    "🍂": "ico-leaf",
+    "🐔": "ico-peck",
+    "💧": "ico-drip"
+  };
   return `
   <h1 class="display" tabindex="-1">Motores da Roça e Oficina</h1>
   <p class="lead">Particularidades e segredos dos motores elétricos nas atividades práticas do dia a dia:</p>
   <div>
     ${MAQUINAS.map(m => `
       <div class="farm-card">
-        <div class="farm-ico">${m.ico}</div>
+        <div class="farm-ico ${farmIcoClass[m.ico] || ""}">${m.ico}</div>
         <div>
           <h3 class="display">${m.t}</h3>
           <p>${m.d}</p>
