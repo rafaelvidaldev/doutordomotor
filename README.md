@@ -46,8 +46,10 @@ O **Doutor do Motor** foi desenvolvido com foco em acessibilidade e facilidade d
 
 ## 🎨 Design e Stack
 
-- **Stack 100% nativa:** Único arquivo `index.html` contendo HTML5, CSS3 e Vanilla JavaScript inline. Sem build, sem bundler e sem dependências externas pesadas.
-- **Identidade Visual Neobrutalista Cartunesca:** Bordas pretas grossas (3px), sombras chapadas sólidas, cores vibrantes com alto contraste e botões de toque com resposta tátil de afundamento.
+- **Build & Dev:** [Vite](https://vitejs.dev/) para desenvolvimento ultra-rápido com Hot Module Replacement (HMR) e build otimizado para produção.
+- **Frontend Moderno e Modular:** Vanilla JavaScript modular (`src/main.js`, `src/data/`, `src/components/`) e CSS Neobrutalista desacoplado.
+- **Deploy:** Otimizado com detecção automática zero-config para o [Vercel](https://vercel.com/) (`npm run build` -> pasta `dist`).
+- **Identidade Visual Neobrutalista Cartunesca:** Bordas pretas grossas (3px), sombras chapadas sólidas, cores vibrantes com alto contraste e botões com resposta tátil de afundamento.
 - **Mascote Original SVG:** Motorzinho com expressões dinâmicas para 4 humores (*feliz*, *pensativo*, *preocupado* e *em perigo*).
 - **Acessibilidade:** Suporte a modo escuro (`prefers-color-scheme`), contraste elevado, áreas de toque ≥ 48px e respeito a movimento reduzido (`prefers-reduced-motion`).
 
@@ -55,7 +57,26 @@ O **Doutor do Motor** foi desenvolvido com foco em acessibilidade e facilidade d
 
 ## 📦 Como Executar
 
-Basta abrir o arquivo `index.html` em qualquer navegador moderno (computador ou celular) ou disponibilizar o arquivo em serviços de hospedagem estática como GitHub Pages, Vercel ou Netlify.
+### Desenvolvimento Local:
+```bash
+# Instalar dependências
+npm install
+
+# Iniciar servidor local Vite (Hot Reload)
+npm run dev
+```
+
+### Build de Produção:
+```bash
+# Gerar arquivos otimizados na pasta dist/
+npm run build
+
+# Testar o build localmente
+npm run preview
+```
+
+### Deploy no Vercel:
+O projeto já conta com preset nativo para o Vercel. Basta conectar o repositório GitHub ao Vercel: ele detectará automaticamente o Vite (`Framework Preset: Vite`), rodará `npm run build` e publicará a pasta `dist`.
 
 ---
 
