@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Doutor do Motor - Diagnóstico e Ferramentas para Motores Elétricos na Roça</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Lexend:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#9FD3FF; --dot:rgba(0,0,0,.14); --on-bg:#000; --on-bg-soft:#1b1b1b;
+  --surface:#FFFFFF; --ink:#000; --line:#000; --shadow:#000;
+  --yellow:#FFD23F; --green:#4BE08B; --red:#FF5A52; --lilac:#C9B0FF; --pink:#FFA3D1; --blue:#5AB0FF; --cream:#FFF4C2;
+  --muted:#3c3c3c;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){ --bg:#20375C; --dot:rgba(255,255,255,.10); --on-bg:#fff; --on-bg-soft:#dfe8f5; }
+}
+:root[data-theme="dark"]{ --bg:#20375C; --dot:rgba(255,255,255,.10); --on-bg:#fff; --on-bg-soft:#dfe8f5; }
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{
+  margin:0; min-height:100%;
+  background-color:var(--bg);
+  background-image:radial-gradient(var(--dot) 1.6px, transparent 1.7px);
+  background-size:22px 22px;
+  color:var(--ink);
+  font-family:'Lexend',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
+  font-size:17px; line-height:1.5;
+  overflow-x:hidden;
+}
+.wrap{max-width:560px; margin:0 auto; padding:14px 18px 56px}
+.display{font-family:'Lilita One','Arial Rounded MT Bold','Trebuchet MS',Arial,sans-serif; font-weight:400; letter-spacing:.01em}
+h1,h2,h3{margin:0}
+h1{font-size:2.35rem; line-height:1.06; color:var(--on-bg)}
+h1:focus,h2:focus{outline:none}
+.lead{color:var(--on-bg-soft); font-size:1.05rem; margin:12px 0 20px; max-width:32em}
+.muted{color:var(--muted)}
+
+/* barra superior */
+.top{display:flex; align-items:center; gap:12px; margin-bottom:18px; min-height:48px}
+.brand{font-size:1.4rem; color:var(--on-bg); display:flex; align-items:center; gap:10px}
+.brand-dot{width:34px;height:34px;border:3px solid var(--line);border-radius:50%;background:var(--yellow);display:grid;place-items:center;box-shadow:2px 2px 0 var(--shadow)}
+.brand-dot svg{width:18px;height:18px}
+.iconbtn{
+  width:48px;height:48px;flex:none;border:3px solid var(--line);border-radius:12px;background:var(--surface);
+  box-shadow:4px 4px 0 var(--shadow); font-size:1.4rem; cursor:pointer; display:grid; place-items:center; color:#000;
+  transition:transform .08s ease, box-shadow .08s ease;
+}
+.iconbtn:active{transform:translate(3px,3px); box-shadow:1px 1px 0 var(--shadow)}
+
+/* cards e botoes */
+.card{
+  background:var(--surface); border:3px solid var(--line); border-radius:18px; box-shadow:6px 6px 0 var(--shadow);
+  padding:18px; position:relative;
+  animation:cardPop .28s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.card + .card{margin-top:18px}
+@keyframes cardPop{0%{transform:scale(0.97) translateY(8px); opacity:0} 100%{transform:scale(1) translateY(0); opacity:1}}
+
+.btn{
+  font:inherit; color:#000; background:var(--surface); border:3px solid var(--line); border-radius:12px;
+  box-shadow:5px 5px 0 var(--shadow); padding:14px 16px; width:100%; text-align:left; cursor:pointer;
+  display:flex; align-items:center; gap:14px; transition:transform .08s ease, box-shadow .08s ease, background-color .1s; text-decoration:none;
+}
+.btn:active{transform:translate(4px,4px); box-shadow:1px 1px 0 var(--shadow)}
+.btn:focus-visible,.iconbtn:focus-visible,summary:focus-visible,.field:focus-visible,.chk:focus-within{outline:4px dashed #000; outline-offset:4px}
+.btn .t{font-family:'Lilita One','Arial Rounded MT Bold',Arial,sans-serif; font-size:1.2rem; line-height:1.15; display:block}
+.btn .s{font-size:.9rem; color:var(--muted); display:block; margin-top:3px; line-height:1.35}
+.btn .ico{
+  font-size:1.7rem; flex:none; width:44px; height:44px; display:grid; place-items:center;
+  border:3px solid var(--line); border-radius:50%; background:var(--cream);
+  box-shadow:1px 1px 0 var(--shadow);
+}
+.btn-yellow{background:var(--yellow)}
+.btn-green{background:var(--green)}
+.btn-pink{background:var(--pink)}
+.btn-lilac{background:var(--lilac)}
+.btn-blue{background:var(--blue)}
+.btn-cream{background:var(--cream)}
+.btn-big{justify-content:center; text-align:center; padding:18px}
+.btn-big .t{font-size:1.35rem}
+.stack{display:grid; gap:14px}
+.grid2{display:grid; grid-template-columns:1fr 1fr; gap:14px}
+.grid2 .btn{flex-direction:column; align-items:flex-start; min-height:134px}
+.grid2 .btn .ico{margin-bottom:4px}
+.grid2 .btn:last-child:nth-child(odd){grid-column:span 2}
+.btn.selected{background:var(--yellow)}
+
+/* mascote ultra-animado */
+.hero{text-align:left; margin-top:4px}
+.mascot{width:200px; height:auto; display:block; margin:0 0 10px -6px; overflow:visible}
+.mascot.sm{width:115px}
+.mascot .bob{animation:bob 2.6s ease-in-out infinite; transform-origin:100px 140px}
+.mascot.shake .bob{animation:shake .32s linear infinite}
+.mascot .smoke circle{animation:puff 1.6s ease-out infinite}
+.mascot .sweat{animation:drip 1.8s ease-in infinite}
+.mascot .sparkle{animation:spark 1.4s ease-in-out infinite alternate}
+.mascot .blush{animation:blushGlow 2.5s ease-in-out infinite alternate}
+.mascot .fan-spin{animation:spin 1.2s linear infinite; transform-origin:176px 90px}
+
+@keyframes bob{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-6px) rotate(-1.5deg)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-4px) rotate(-1.5deg)}40%{transform:translateX(4px) rotate(1.5deg)}60%{transform:translateX(-3px) rotate(-1deg)}80%{transform:translateX(3px) rotate(1deg)}}
+@keyframes puff{0%{transform:translate(0,0) scale(0.7);opacity:0.9}100%{transform:translate(-6px,-22px) scale(1.4);opacity:0}}
+@keyframes drip{0%{transform:translateY(-4px);opacity:0}40%{opacity:1}80%{transform:translateY(16px);opacity:0.9}100%{transform:translateY(22px);opacity:0}}
+@keyframes spark{0%{opacity:0.2; transform:scale(0.8)} 100%{opacity:1; transform:scale(1.2) rotate(15deg)}}
+@keyframes blushGlow{0%{opacity:0.75} 100%{opacity:1; filter:brightness(1.1)}}
+
+@media (prefers-reduced-motion:reduce){
+  .mascot .bob, .mascot.shake .bob, .mascot .smoke circle, .mascot .sweat, .mascot .sparkle, .mascot .fan-spin, .spin, .belt-track, .meter-hand, .card{
+    animation:none!important;
+  }
+}
+
+.section-title{font-size:1.55rem; color:var(--on-bg); margin:36px 0 14px}
+.section-sub{color:var(--on-bg-soft); font-size:.95rem; margin:-6px 0 16px}
+.note{background:var(--lilac)}
+.note p{margin:0}
+.foot{margin-top:36px; font-size:.85rem; color:var(--on-bg-soft); line-height:1.5}
+.foot p{margin:4px 0}
+/* progresso */
+.progress{display:flex; gap:6px; margin:0 0 18px}
+.progress span{flex:1; height:14px; border:3px solid var(--line); border-radius:999px; background:var(--surface); transition:background-color .2s}
+.progress span.on{background:var(--yellow)}
+.step-label{font-size:.92rem; font-weight:700; color:var(--on-bg-soft); margin:0 0 6px}
+
+/* pergunta */
+.qhead{display:flex; align-items:flex-end; gap:12px; margin-bottom:10px}
+.bubble{position:relative; background:var(--surface); border:3px solid var(--line); border-radius:18px; padding:16px 18px; box-shadow:6px 6px 0 var(--shadow); margin-bottom:20px}
+.bubble h2{font-size:1.55rem; line-height:1.15}
+.bubble p{margin:8px 0 0; color:var(--muted); font-size:.95rem}
+.bubble::before{content:""; position:absolute; left:34px; top:-17px; width:24px; height:24px; background:var(--surface); border-left:3px solid var(--line); border-top:3px solid var(--line); transform:rotate(45deg)}
+.hint{margin-top:18px}
+details{border:3px solid var(--line); border-radius:12px; background:var(--cream); padding:0; overflow:hidden}
+summary{cursor:pointer; padding:12px 14px; font-weight:700; list-style:none; user-select:none}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"+"; display:inline-grid; place-items:center; width:24px;height:24px;border:3px solid var(--line);border-radius:50%;margin-right:10px;font-weight:700;background:var(--surface);line-height:1}
+details[open] summary::before{content:"–"}
+details .in{padding:0 14px 14px}
+details .in p{margin:6px 0}
+
+/* resultado */
+.verdict{border:3px solid var(--line); border-radius:22px; box-shadow:7px 7px 0 var(--shadow); padding:18px; display:flex; gap:12px; align-items:center}
+.verdict .mascot{width:120px; margin:0; flex:none}
+.verdict h2{font-size:1.75rem; line-height:1.05}
+.verdict p{margin:6px 0 0; font-size:.95rem}
+.g0{background:var(--green)} .g1{background:var(--yellow)} .g2{background:var(--red)}
+.safety{margin:20px 0; background:var(--cream); display:flex; gap:12px; align-items:flex-start}
+.safety .big{font-size:1.8rem; line-height:1}
+.safety p{margin:0}
+.cause{position:relative; padding-top:22px}
+.cause + .cause{margin-top:26px}
+.rank{position:absolute; top:-18px; left:16px; background:var(--surface); border:3px solid var(--line); border-radius:999px; padding:2px 14px; font-size:.95rem; font-weight:700; box-shadow:3px 3px 0 var(--shadow)}
+.rank.first{background:var(--pink)}
+.cause h3{font-size:1.45rem; line-height:1.15; margin-bottom:6px}
+.tag{display:inline-block; border:2px solid var(--line); border-radius:999px; padding:2px 12px; font-size:.82rem; font-weight:700; margin-bottom:10px}
+.cause h4{font-size:1rem; margin:14px 0 6px}
+.cause ul{margin:0; padding-left:22px}
+.cause li{margin:4px 0}
+.cause .pro{background:#E8F4FF; border:2px solid var(--line); border-radius:10px; padding:10px 12px; margin:0}
+.cause details{margin-top:14px}
+.urgent-steps{margin:0; padding-left:24px}
+.urgent-steps li{margin:8px 0; font-weight:500}
+.actions{display:grid; gap:14px; margin-top:28px}
+.actions .btn{text-align:center; justify-content:center}
+
+/* placa metalica */
+.placa{background:#CAD1D9; border:3px solid var(--line); border-radius:12px; box-shadow:6px 6px 0 var(--shadow); padding:16px; position:relative}
+.placa .screw{position:absolute; width:13px; height:13px; border:2.5px solid var(--line); border-radius:50%; background:#fff; display:grid; place-items:center}
+.placa .screw::after{content:""; width:7px; height:2px; background:#000}
+.placa .screw.tl{top:8px; left:8px; transform:rotate(25deg)}
+.placa .screw.tr{top:8px; right:8px; transform:rotate(70deg)}
+.placa .screw.bl{bottom:8px; left:8px; transform:rotate(40deg)}
+.placa .screw.br{bottom:8px; right:8px; transform:rotate(15deg)}
+.placa-brand{text-align:center; font-family:'Lilita One',Arial,sans-serif; font-size:1.15rem; color:#0A2540; letter-spacing:.03em; margin:2px 20px 2px}
+.placa-sub{text-align:center; font-size:.78rem; font-weight:700; color:#333; margin-bottom:12px}
+.fields{display:grid; grid-template-columns:repeat(3,1fr); gap:8px}
+.field{
+  font:inherit; font-weight:700; font-size:.95rem; background:#fff; border:2.5px solid var(--line); border-radius:8px;
+  padding:10px 4px; cursor:pointer; color:#000; text-align:center; transition:transform .08s, background .08s;
+  box-shadow:2px 2px 0 var(--shadow);
+}
+.field:active{transform:translate(2px,2px); box-shadow:0 0 0}
+.field.on{background:var(--yellow); box-shadow:3px 3px 0 var(--shadow); transform:translate(-2px,-2px)}
+.explain{margin-top:20px; min-height:120px}
+.explain h3{font-size:1.35rem; margin-bottom:6px}
+.explain p{margin:0}
+
+/* calculadora de polias animada */
+.pulley-canvas{width:100%; height:auto; display:block; margin:12px auto; overflow:visible}
+.belt-track{stroke-dasharray:8 6; animation:beltMove 1.5s linear infinite}
+@keyframes beltMove{to{stroke-dashoffset:-28}}
+.slider-box{background:var(--cream); border:2.5px solid var(--line); border-radius:12px; padding:12px 14px; margin:10px 0}
+.slider-box label{display:flex; justify-content:space-between; font-weight:700; font-size:.95rem; margin-bottom:6px}
+.slider-box input[type="range"]{width:100%; height:12px; -webkit-appearance:none; background:#fff; border:2px solid var(--line); border-radius:6px; outline:none}
+.slider-box input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none; width:26px; height:26px; border:2.5px solid var(--line); border-radius:50%; background:var(--yellow); cursor:pointer; box-shadow:2px 2px 0 var(--shadow)}
+.rpm-meter{background:#fff; border:3px solid var(--line); border-radius:14px; padding:14px; text-align:center; margin-top:14px; box-shadow:4px 4px 0 var(--shadow)}
+.rpm-val{font-family:'Lilita One',Arial,sans-serif; font-size:2.4rem; color:#000; line-height:1}
+.rpm-badge{display:inline-block; border:2px solid var(--line); border-radius:999px; padding:2px 12px; font-weight:700; font-size:.85rem; margin-top:8px}
+
+/* calculadora de extensao / voltimetro */
+.volt-box{text-align:center; margin:14px 0}
+.volt-svg{width:220px; height:120px; display:block; margin:0 auto; overflow:visible}
+.meter-hand{transform-origin:110px 105px; transition:transform .4s cubic-bezier(0.34, 1.56, 0.64, 1)}
+
+/* checklist */
+.chk{display:flex; gap:12px; align-items:flex-start; padding:10px 0; border-bottom:2px dashed #00000033; cursor:pointer}
+.chk:last-child{border-bottom:0}
+.chk input{appearance:none; -webkit-appearance:none; width:30px; height:30px; flex:none; border:3px solid var(--line); border-radius:8px; background:#fff; margin:0; cursor:pointer; display:grid; place-items:center}
+.chk input:checked{background:var(--green)}
+.chk input:checked::after{content:"✓"; font-weight:700; font-size:1.15rem; color:#000}
+.chk input:checked + span{text-decoration:line-through; color:#555}
+
+/* como gira */
+.steps{counter-reset:s; list-style:none; margin:0; padding:0}
+.steps li{counter-increment:s; position:relative; padding-left:52px; margin:0 0 18px}
+.steps li::before{content:counter(s); position:absolute; left:0; top:-2px; width:38px; height:38px; border:3px solid var(--line); border-radius:50%; background:var(--yellow); display:grid; place-items:center; font-family:'Lilita One',Arial,sans-serif; font-size:1.2rem}
+.field-anim{display:block; margin:6px auto 16px; width:180px; height:180px}
+.spin{animation:spin 2.2s linear infinite; transform-origin:90px 90px}
+.spin-field{animation:spin 1.8s linear infinite; transform-origin:90px 90px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* maquinas da roca */
+.farm-card{display:flex; gap:14px; align-items:flex-start; padding:14px; border:2.5px solid var(--line); border-radius:14px; background:#fff; box-shadow:4px 4px 0 var(--shadow); margin-bottom:12px}
+.farm-ico{font-size:2rem; flex:none; width:48px; height:48px; border:2.5px solid var(--line); border-radius:12px; background:var(--cream); display:grid; place-items:center}
+.farm-card h3{font-size:1.2rem; margin-bottom:4px}
+.farm-card p{margin:0; font-size:.9rem; color:#222}
+
+/* toast */
+.toast{position:fixed; left:50%; bottom:calc(20px + env(safe-area-inset-bottom,0px)); transform:translateX(-50%) translateY(140%); background:var(--green); border:3px solid var(--line); border-radius:12px; box-shadow:4px 4px 0 var(--shadow); padding:10px 18px; font-weight:700; transition:transform .22s cubic-bezier(0.34, 1.56, 0.64, 1); z-index:100}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+@media (max-width:380px){
+  h1{font-size:2rem}
+  .grid2{grid-template-columns:1fr}
+  .grid2 .btn{min-height:0; flex-direction:row; align-items:center}
+  .grid2 .btn:last-child:nth-child(odd){grid-column:span 1}
+  .fields{grid-template-columns:repeat(2,1fr)}
+  .wrap{padding-left:14px; padding-right:14px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top" id="top"></header>
+  <main id="app" aria-live="polite"></main>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+/* ---------- Base de conhecimento do motor ---------- */
+const CAUSES = {
+  sem_energia:{t:"A energia não está chegando ao motor", g:1,
+    check:["Veja se o disjuntor do galpão ou da casa desarmou.","Confira se o plugue na tomada está firme e se a tomada funciona ligando outro aparelho.","Se usa chave alavanca ou botão liga/desliga, veja se não quebrou por dentro."],
+    pro:"Se a tomada tem energia e o disjuntor está armado, o problema pode estar no botão, na fiação até o motor ou dentro da carcaça. Chame o eletricista.",
+    why:"Silêncio total significa que a corrente elétrica nem entra nas bobinas. Sem corrente não existe campo magnético, e sem campo o motor não sai do lugar."},
+  capacitor:{t:"Capacitor fraco ou queimado", g:1, only:"mono",
+    check:["Com o motor fora da tomada, olhe aquele cilindro preto ou prata preso em cima da carcaça.","Sinais clássicos de defeito: estufado parecendo lata de cerveja amassada, trincado, vazando óleo ou cheirando a queimado."],
+    pro:"A peça é barata na agropecuária ou loja elétrica, mas o capacitor guarda choque mesmo desligado! Peça para o eletricista descarregar e colocar outro do mesmo valor de microfarads (µF) e voltagem.",
+    why:"O motor monofásico de 2 fios sozinho não sabe para qual lado girar. O capacitor atrasa a corrente numa bobina auxiliar e dá o 'empurrão' de partida. Quando estraga, o motor só ronca e esquenta até queimar."},
+  centrifuga:{t:"Chave centrífuga suja ou travada", g:1, only:"mono",
+    check:["Desconfie dela se o motor zumbe e só pega no tranco, ou se esquenta fervendo logo depois de ligar.","Não abra o motor: essa pecinha com molas e platinado fica escondida na tampa traseira."],
+    pro:"Comum pegar serragem, poeira de ração ou fuligem no contato. Precisa abrir a tampa traseira para lixar ou trocar a chave centrífuga e o platinado.",
+    why:"A chave centrífuga liga a bobina de partida no começo e desliga com a força centrífuga quando o motor atinge 75% da rotação. Se travar aberta, não parte; se travar fechada, a bobina de partida cozinha."},
+  falta_fase:{t:"Falta de uma das fases (motor em 2 fases)", g:2, only:"tri",
+    check:["Desligue imediatamente! Motor trifásico funcionando em duas fases queima em poucos minutos.","Veja no quadro se um fusível queimou ou se caiu um polo do disjuntor tripolar.","Pergunte ao vizinho se a rede elétrica da região está oscilando na localidade."],
+    pro:"O eletricista vai medir a tensão entre as três fases com multímetro. Se a falta vier da rede da concessionária, ligue para a empresa de energia da sua região.",
+    why:"O motor trifásico precisa das 3 fases alternadas para criar o campo magnético que gira sozinho. Faltando uma, o rotor fica puxando corrente absurda nas outras duas bobinas até derreter o verniz."},
+  travado:{t:"Eixo travado ou carga pesada demais", g:1,
+    check:["Com o motor DESLIGADO da tomada, tente girar o eixo com a mão.","Se tiver correia, tire a correia e gire o motor solto. Se ficar leve, o problema é a máquina (ensiladeira, picador, moenda) e não o motor!","Procure pedaço de madeira, pedra, cordão, sabugo ou ração empedrada travando a navalha."],
+    pro:"Se o eixo do motor continuar pesado mesmo sem correia e sem nada preso, o rolamento interno fundiu.",
+    why:"Na hora de sair do zero, o motor puxa de 6 a 8 vezes a corrente normal para vencer a inércia. Se a máquina está travada, essa corrente monstruosa não baixa e queima o motor em segundos."},
+  rolamento:{t:"Rolamento gasto ou estragado", g:1,
+    check:["Motor desligado da energia: gire o eixo devagar com a mão. Sente arranhar como se tivesse areia dentro?","Tente chacoalhar o eixo para cima e para baixo. Não pode ter nenhuma folga ou jogo."],
+    pro:"A troca dos rolamentos (ex.: 6204, 6205) é rápida com saca-polia. Não espere: rolamento ruim deixa o rotor raspar no estator e destrói o motor por dentro.",
+    why:"O rolamento deixa o rotor girar no centro com mínimo atrito. Quando as esferas gastam, o atrito gera calor brutal e o rotor raspa nas bobinas."},
+  subtensao:{t:"Queda de tensão (fim de linha na roça ou fio fino)", g:1,
+    check:["Usa extensão comprida de fio fino (1,5mm ou 2,5mm)? Evite ao máximo.","Repare se a luz do galpão amarela e enfraquece na hora que liga o motor.","Piora no fim da tarde, quando vizinhos ligam resfriadores de leite e chuveiros."],
+    pro:"O eletricista mede a voltagem com o motor roncando. Se cair de 220V para menos de 195V, precisa engrossar os fios da instalação ou solicitar reforço de transformador à distribuidora.",
+    why:"Para entregar a mesma força com menos voltagem, a física exige que a corrente (amperes) aumente. E o calor gerado no fio sobe com o QUADRADO da corrente. Fio fino na roça ferve motor!"},
+  sobrecarga:{t:"Motor trabalhando além do que aguenta", g:1,
+    check:["A máquina está pedindo mais força do que o normal? Lâmina do triturador cega, correia esticada como corda de violão, madeira muito dura e verde?","Confira se o motor tem cavalos (cv) suficientes para a máquina."],
+    pro:"O eletricista coloca o alicate amperímetro no fio com a máquina operando e confere se a corrente passou da amperagem nominal indicada na placa.",
+    why:"Quanto mais peso o motor empurra, mais corrente ele puxa. Passou do limite da placa, as bobinas esquentam além do limite térmico do verniz isolante."},
+  ventilacao:{t:"Ventilação entupida com poeira ou palha", g:0,
+    check:["Com o motor frio e desligado, olhe as aletas de ferro e a grade da hélice atrás.","Em galpão de fumo, marcenaria ou paiol, palha, serragem e teia de aranha tampam a passagem de ar.","Passe uma escova ou pincel seco para tirar a crosta de sujeira."],
+    pro:"Se as aletas estão limpas e o motor continua fervendo em menos de 10 minutos, o defeito é elétrico ou mecânico.",
+    why:"A hélice traseira sopra vento pelas aletas de ferro da carcaça. Uma camada de pó de 2 milímetros funciona como um cobertor térmico: o calor fica preso e cozinha o motor."},
+  partidas:{t:"Liga e desliga vezes demais sem descanso", g:1,
+    check:["Conte quantas partidas ele dá por hora.","Em bomba d'água de poço ou cisterna, veja se a boia elétrica não está oscilando ou se o pressostato está desregulado."],
+    pro:"Um eletricista pode instalar relé temporizador ou partida suave (soft-starter) para proteger a rede da propriedade.",
+    why:"Toda partida puxa um pico brutal de corrente que esquenta os fios. Muitas partidas seguidas não dão tempo de esfriar, acumulando calor até derreter o isolamento."},
+  correia:{t:"Correia frouxa, gasta ou desalinhada", g:0,
+    check:["Com a máquina desligada, aperte a correia no meio com o polegar: deve ceder de 1 a 2 cm.","Se tiver pó preto no chão ou a correia estiver espelhada e brilhando, ela está patinando.","Use uma régua encostada nas duas polias para ver se estão retinhas."],
+    pro:"Troque a correia por uma nova do perfil correto (tipo A, B ou V). Se as polias estiverem gastas em fundo de garganta, troque a polia.",
+    why:"Correia frouxa patina e o motor perde rendimento; correia apertada demais mói o rolamento e empena a ponta do eixo."},
+  base_solta:{t:"Base ou parafusos frouxos vibrando", g:0,
+    check:["Motor desligado: aperte com chave os parafusos que prendem as sapatas do motor na bancada.","Veja se o esticador do motor não trincou ou se a tábua da base não apodreceu."],
+    pro:"Se apertar os parafusos não sumir a vibração, o defeito pode ser desbalanceamento ou rolamento.",
+    why:"Motor de alta rotação solto vibra e vai afrouxando fiações e conexões elétricas, além de quebrar as sapatas de ferro fundido."},
+  desbalanceamento:{t:"Hélice, navalha ou disco desbalanceado", g:1,
+    check:["Veja se a navalha da ensiladeira quebrou um dente, ou se a serra está faltando pastilha de metal duro.","Pedaço de barro ou massa de graxa grudada de um lado só da polia também desbalanceia."],
+    pro:"Lâminas de alta rotação precisam ser balanceadas aos pares com balança ou gabarito.",
+    why:"A 1.750 ou 3.500 voltas por minuto, qualquer grama de diferença de peso puxa o eixo com força centrífuga brutal, destruindo rolamentos e mancais."},
+  isolamento:{t:"Umidade ou verniz das bobinas estragado", g:2,
+    check:["O motor tomou chuva, inundação de sanga ou ficou muito tempo em galpão úmido e mofado?","NUNCA ligue motor molhado direto na tomada!"],
+    pro:"O eletricista mede o isolamento com o aparelho Megômetro. Se for só umidade, basta estufar o motor numa lâmpada ou estufa por 24h para secar.",
+    why:"O fio de cobre é coberto por verniz microscópico. Umidade penetra nas microfissuras e faz a corrente vazar para a carcaça de ferro, desarmando o DR e dando choque mortal."},
+  curto:{t:"Bobina queimada ou em curto-circuito", g:2,
+    check:["Sinais claros: cheiro forte de verniz queimado (cheiro acre inconfundível), fumaça preta ou disjuntor caindo na hora que bate a chave.","Não tente ligar de novo para não derreter o restante dos fios."],
+    pro:"Leve para uma oficina de rebobinamento de confiança. Eles vão trocar os enrolamentos de cobre e isolar novamente.",
+    why:"O verniz derreteu pelo calor e fios vivos encostaram direto uns nos outros. A corrente dá um salto curto e gera fogo instantâneo."},
+  protecao:{t:"Disjuntor ou relé térmico inadequado", g:1,
+    check:["O disjuntor foi trocado por um qualquer? Motor elétrico precisa de disjuntor de curva 'C' ou 'D', que aguenta o pico inicial de partida sem desarmar.","Confira a amperagem na placa do motor."],
+    pro:"O eletricista ajusta o relé térmico da contatora exatamente no valor da corrente nominal de serviço indicada na placa.",
+    why:"Disjuntor residencial comum curva B cai com qualquer pico de motor. Já colocar disjuntor exagerado (ex: 50A para motor de 10A) não protege nada e deixa o motor queimar sem cair a chave."},
+  aterramento:{t:"Falta de fio terra (risco grave de choque)", g:2,
+    check:["Pare de tocar na carcaça! O motor está perigoso.","Existe fio verde ou verde-amarelo conectado à haste de cobre fincada na terra? Se não tem, a carcaça fica eletrificada."],
+    pro:"Chame o eletricista com urgência para instalar a haste de terra e o disjuntor DR (Diferencial Residual).",
+    why:"Sem o fio terra, se houver qualquer fuga de eletricidade da bobina para a carcaça de ferro, quem encostar no motor vira o caminho da corrente até o chão."}
+};
+
+const SYMPTOMS = [
+  {id:"nao_parte", ico:"🔌", t:"Não liga ou só zumbe", s:"Bate a chave e o motor não gira",
+   fallback:["sem_energia","capacitor","falta_fase"],
+   qs:[
+    {q:"Quando você liga a chave, o que acontece?", opts:[
+      {t:"Faz um zumbido 'hummm', mas não sai do lugar", fx:{capacitor:3, falta_fase:3, travado:2, centrifuga:1}},
+      {t:"Silêncio total, nem sinal de vida", fx:{sem_energia:5}},
+      {t:"Começa a rodar bem devagarinho e logo para ou cai o disjuntor", fx:{sobrecarga:2, travado:2, subtensao:2, capacitor:1}}]},
+    {q:"Com o motor fora da tomada, o eixo gira leve com a mão?", h:"Cuidado: tire da energia antes de encostar a mão no eixo ou polia.", opts:[
+      {t:"Sim, gira solto e levinho", fx:{capacitor:1, falta_fase:1, centrifuga:1}},
+      {t:"Não, está pesado, travado ou arranhando", fx:{travado:3, rolamento:2}},
+      {t:"Não sei dizer", fx:{}}]},
+    {q:"As lâmpadas do galpão ou outros aparelhos também estão fracos?", opts:[
+      {t:"Sim, a luz amarela ou a rede toda enfraquece", fx:{subtensao:2, falta_fase:2, sem_energia:1}},
+      {t:"Não, só o motor está com problema", fx:{capacitor:1, centrifuga:1}},
+      {t:"Não reparei", fx:{}}]}
+   ]},
+  {id:"esquenta", ico:"🔥", t:"Esquenta demais", s:"Não dá nem para deixar a mão na carcaça",
+   fallback:["ventilacao","sobrecarga","subtensao"],
+   base:[{c:"falta_fase", v:1}],
+   qs:[
+    {q:"Onde esse motor trabalha no sítio?", opts:[
+      {t:"Lugar com pó de serra, palha de milho, fumo ou dentro de caixa", fx:{ventilacao:3}},
+      {t:"Lugar limpo, ventilado e arejado", fx:{sobrecarga:1}}]},
+    {q:"Ele fica ligando e desligando toda hora?", opts:[
+      {t:"Sim, muitas vezes por hora (ex.: bomba ou compressor)", fx:{partidas:3}},
+      {t:"Não, trabalha direto", fx:{}},
+      {t:"Não sei", fx:{}}]},
+    {q:"Usa extensão comprida ou fica longe do transformador da rede?", h:"Propriedades no fim da rede rural costumam ter esse problema.", opts:[
+      {t:"Sim, fica longe ou usa extensão de fio fino", fx:{subtensao:3}},
+      {t:"Não, fiação grossa e perto do quadro", fx:{}}]},
+    {q:"A máquina está exigindo mais força do que antes?", h:"Lâmina cega no triturador, correia muito esticada, bomba puxando com sujeira.", opts:[
+      {t:"Sim, o serviço está mais pesado", fx:{sobrecarga:3}},
+      {t:"Não, serviço normal de sempre", fx:{}},
+      {t:"Não reparei", fx:{}}]},
+    {q:"Além do calor, o motor faz barulho estranho?", opts:[
+      {t:"Sim, chia como se tivesse areia ou ronca forte", fx:{rolamento:2, falta_fase:{tri:2}}},
+      {t:"Não, barulho parece normal", fx:{}}]}
+   ]},
+  {id:"barulho", ico:"📢", t:"Barulho ou vibração", s:"Ronca, chia, apita ou treme a bancada",
+   fallback:["rolamento","base_solta","desbalanceamento"],
+   qs:[
+    {q:"Como é o som do barulho?", opts:[
+      {t:"Chiado, apito contínuo ou raspado de areia", fx:{rolamento:3}},
+      {t:"Pancada, trepidação ou chacoalho", fx:{base_solta:2, desbalanceamento:2, correia:1}},
+      {t:"Zumbido elétrico forte e ele esquenta rápido", fx:{falta_fase:3, centrifuga:2, subtensao:1}}]},
+    {q:"Com o motor desligado da tomada, o eixo tem jogo ou folga?", opts:[
+      {t:"Sim, balança para os lados ou arranha", fx:{rolamento:3}},
+      {t:"Não, parece firme", fx:{base_solta:1, desbalanceamento:1}},
+      {t:"Não sei avaliar", fx:{}}]},
+    {q:"Você trocou ou mexeu em alguma peça recentemente?", h:"Troca de polia, lâmina, faca da forrageira ou correia.", opts:[
+      {t:"Sim, mexi há pouco tempo", fx:{desbalanceamento:2, correia:2, base_solta:1}},
+      {t:"Não, tudo igual há meses", fx:{}}]},
+    {q:"Os parafusos que seguram o motor na base estão bem apertados?", opts:[
+      {t:"Sim, bem firmes", fx:{}},
+      {t:"Estão frouxos, com tábua podre ou não sei", fx:{base_solta:2}}]}
+   ]},
+  {id:"desarma", ico:"⚡", t:"Desarma o disjuntor", s:"Bate a chave e o disjuntor cai na hora ou depois",
+   fallback:["protecao","sobrecarga","isolamento"],
+   qs:[
+    {q:"Em que momento o disjuntor cai?", opts:[
+      {t:"No exato segundo em que liga a chave", fx:{curto:2, protecao:2, travado:1}},
+      {t:"Depois de alguns minutos trabalhando no esforço", fx:{sobrecarga:2, subtensao:1, ventilacao:1}},
+      {t:"Desarma o DR, ou só cai em dias de chuva e cerração", fx:{isolamento:3}}]},
+    {q:"O motor pegou umidade, chuva ou ficou meses parado no galpão?", opts:[
+      {t:"Sim, ficou no úmido ou muito tempo sem uso", fx:{isolamento:3}},
+      {t:"Não, galpão seco e trabalha sempre", fx:{}}]},
+    {q:"O disjuntor foi trocado há pouco tempo por outro?", opts:[
+      {t:"Sim, trocou recentemente", fx:{protecao:3}},
+      {t:"Não, é o mesmo antigo", fx:{}},
+      {t:"Não sei", fx:{}}]},
+    {q:"Sentiu cheiro forte de queimado ou viu fumaça saindo?", opts:[
+      {t:"Sim, cheiro forte ou fumacinha", fx:{curto:5}, red:true},
+      {t:"Não, nada de fumaça", fx:{}}]}
+   ]},
+  {id:"fraco", ico:"🐢", t:"Perde força no serviço", s:"Engasga quando bota peso ou perde o embalo",
+   fallback:["subtensao","sobrecarga","correia"],
+   base:[{c:"capacitor", v:2}],
+   qs:[
+    {q:"Usa extensão de fio ou o motor fica longe do quadro?", h:"Fio fino e longo rouba muita força do motor.", opts:[
+      {t:"Sim, extensão comprida ou fio fino", fx:{subtensao:3}},
+      {t:"Não, cabo grosso e curto", fx:{}}]},
+    {q:"As lâmpadas da propriedade enfraquecem quando o motor pega?", opts:[
+      {t:"Sim, a luz cai na hora", fx:{subtensao:2}},
+      {t:"Não, fica estável", fx:{}},
+      {t:"Não reparei", fx:{}}]},
+    {q:"Ele toca a máquina por correia?", opts:[
+      {t:"Sim, e a correia chia, escorrega ou tem pó preto", fx:{correia:3}},
+      {t:"Sim, mas a correia parece boa", fx:{sobrecarga:1}},
+      {t:"Não usa correia (eixo direto)", fx:{}}]},
+    {q:"A máquina está exigindo mais do que a capacidade normal?", opts:[
+      {t:"Sim, navalha cega, carga pesada ou forçando", fx:{sobrecarga:3}},
+      {t:"Não, carga leve de costume", fx:{}}]}
+   ]},
+  {id:"queimado", ico:"💨", t:"Cheiro de queimado", s:"Cheiro de verniz frito ou fumaça visível", urgent:true,
+   urgentCauses:["curto","sobrecarga","isolamento"]},
+  {id:"choque", ico:"⚠️", t:"Dá choque na carcaça", s:"Formiga ou dá tranco ao encostar na máquina", urgent:true,
+   urgentCauses:["aterramento","isolamento"]}
+];
+
+const TYPES = {
+  mono:{t:"Monofásico", s:"Chegam 2 fios (fase + neutro ou duas fases, mais terra). Muito comum em ordenhadeiras, picadeiras e marcenarias pequenas.", ico:"1~"},
+  tri:{t:"Trifásico", s:"Chegam 3 fios de energia (mais o terra). Usado em granjas, aviários, indústrias e motores mais fortes da roça.", ico:"3~"},
+  nao_sei:{t:"Não sei ao certo", s:"Sem problema! O Doutor do Motor vai investigar as causas que servem para os dois.", ico:"?"}
+};
+
+const GRAV = [
+  {t:"Dá pra resolver fácil", s:"Parece coisa simples. Faça as conferências com calma e com o motor desligado.", mood:"happy"},
+  {t:"Atenção no motor!", s:"Se continuar forçando assim ele queima. Veja os itens e, se não resolver, chame o eletricista.", mood:"worried"},
+  {t:"Pare de usar agora!", s:"Risco grave de queimar o motor, dar choque ou iniciar incêndio. Desligue da tomada!", mood:"danger"}
+];
+
+/* ---------- Mascote Original Cartunesco ---------- */
+function mascot(mood="happy", cls=""){
+  const pupil = {happy:[0,2], thinking:[4,-4], worried:[0,4]}[mood] || [0,2];
+  let face="", extra="";
+  if(mood==="danger"){
+    face = `<path d="M68 78 L88 98 M88 78 L68 98 M112 78 L132 98 M132 78 L112 98" stroke="#000" stroke-width="6" stroke-linecap="round"/>
+            <path d="M76 122 l8 -8 l8 8 l8 -8 l8 8 l8 -8 l8 8" fill="none" stroke="#000" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>`;
+    extra = `<g class="smoke" fill="#555" stroke="#000" stroke-width="4">
+              <circle cx="146" cy="22" r="11"/>
+              <circle cx="166" cy="10" r="8" style="animation-delay:.5s"/>
+              <circle cx="132" cy="12" r="7" style="animation-delay:.9s"/>
+            </g>
+            <path class="sparkle" d="M178 60 L188 68 L178 76 L186 90 L172 82 Z" fill="#FFD23F" stroke="#000" stroke-width="3"/>`;
+  } else {
+    face = `<circle cx="78" cy="88" r="14" fill="#fff" stroke="#000" stroke-width="4"/>
+            <circle cx="122" cy="88" r="14" fill="#fff" stroke="#000" stroke-width="4"/>
+            <circle cx="${78+pupil[0]}" cy="${88+pupil[1]}" r="6" fill="#000"/>
+            <circle cx="${122+pupil[0]}" cy="${88+pupil[1]}" r="6" fill="#000"/>
+            <circle cx="${78+pupil[0]-2}" cy="${88+pupil[1]-2}" r="2" fill="#fff"/>
+            <circle cx="${122+pupil[0]-2}" cy="${88+pupil[1]-2}" r="2" fill="#fff"/>`;
+    if(mood==="happy"){
+      face += `<circle class="blush" cx="58" cy="112" r="8" fill="#FFA3D1" stroke="#000" stroke-width="2"/>
+               <circle class="blush" cx="142" cy="112" r="8" fill="#FFA3D1" stroke="#000" stroke-width="2"/>
+               <path d="M82 112 Q100 134 118 112" fill="#000" stroke="#000" stroke-width="4" stroke-linejoin="round"/>
+               <path d="M92 122 Q100 128 108 122" fill="#FF5A52"/>`;
+    } else if(mood==="thinking"){
+      face += `<path d="M66 70 Q78 64 90 70 M110 70 Q122 64 134 70" stroke="#000" stroke-width="5" stroke-linecap="round"/>
+               <path d="M88 120 Q102 114 114 120" fill="none" stroke="#000" stroke-width="5" stroke-linecap="round"/>`;
+      extra = `<path class="sparkle" d="M152 28 L158 14 L164 28 L178 34 L164 40 L158 54 L152 40 L138 34 Z" fill="#FFD23F" stroke="#000" stroke-width="3"/>`;
+    } else if(mood==="worried"){
+      face += `<path d="M64 68 L90 76 M136 68 L110 76" stroke="#000" stroke-width="5" stroke-linecap="round"/>
+               <path d="M80 122 Q90 112 100 122 T120 122" fill="none" stroke="#000" stroke-width="5" stroke-linecap="round"/>`;
+      extra = `<path class="sweat" d="M158 50 q-9 14 0 20 q9 -6 0 -20z" fill="#5AB0FF" stroke="#000" stroke-width="3.5" stroke-linejoin="round"/>`;
+    }
+  }
+  const label = {happy:"Doutor do Motor sorrindo e feliz", thinking:"Doutor do Motor pensativo analisando", worried:"Doutor do Motor preocupado suando", danger:"Doutor do Motor fumegando em perigo"}[mood];
+  return `<svg class="mascot ${cls} ${mood==="danger"?"shake":""}" viewBox="0 0 200 160" role="img" aria-label="${label}">
+    <g class="bob">
+      <!-- Eixo de saida a direita -->
+      <rect x="160" y="80" width="34" height="20" rx="4" fill="#CAD1D9" stroke="#000" stroke-width="5"/>
+      <line x1="166" y1="88" x2="188" y2="88" stroke="#000" stroke-width="3.5" stroke-linecap="round"/>
+      <!-- Base preta com sapatas de fixacao -->
+      <rect x="40" y="134" width="120" height="18" rx="6" fill="#000"/>
+      <circle cx="54" cy="143" r="3.5" fill="#CAD1D9"/>
+      <circle cx="146" cy="143" r="3.5" fill="#CAD1D9"/>
+      <!-- Caixa de ligacao superior com cruz vermelha de socorrista -->
+      <rect x="72" y="18" width="56" height="32" rx="8" fill="#fff" stroke="#000" stroke-width="5"/>
+      <path d="M100 24 V44 M90 34 H110" stroke="#FF5A52" stroke-width="6" stroke-linecap="round"/>
+      <!-- Corpo amarelo do motor com aletas de resfriamento -->
+      <rect x="22" y="44" width="144" height="96" rx="28" fill="#FFD23F" stroke="#000" stroke-width="5"/>
+      <path d="M36 64 V120 M48 56 V128 M138 56 V128 M150 64 V120" stroke="#000" stroke-width="4.5" stroke-linecap="round" opacity=".22"/>
+      ${face}
+      ${extra}
+    </g>
+  </svg>`;
+}
+const boltIco = `<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M9 1 L3 9 H8 L7 15 L13 7 H8 Z" fill="#000"/></svg>`;
+
+/* ---------- Estado da Aplicacao ---------- */
+const S = {
+  view:"home",
+  type:null,
+  sym:null,
+  qi:0,
+  answers:[],
+  placaField:null,
+  // Calculadora de Polias
+  rpmMotor: 1750,
+  dMotor: 80,
+  dMaq: 120,
+  // Calculadora de Extensao
+  distM: 50,
+  fioMm: 2.5,
+  potCv: 2
+};
+const $app = document.getElementById("app");
+const $top = document.getElementById("top");
+const sym = () => SYMPTOMS.find(x => x.id === S.sym);
+
+function pts(v){
+  if(typeof v === "number") return v;
+  if(S.type === "nao_sei") return Math.max(v.mono||0, v.tri||0);
+  return v[S.type] || 0;
+}
+function allowed(id){
+  const c = CAUSES[id];
+  if(!c) return false;
+  return !c.only || S.type === "nao_sei" || c.only === S.type;
+}
+function diagnose(){
+  const s = sym();
+  if(!s) return {list:[], g:1, red:false};
+  if(s.urgent) return {list:s.urgentCauses.filter(allowed), g:2, red:true};
+  const score = {};
+  const add = (c,v) => { score[c] = (score[c]||0) + pts(v); };
+  (s.base||[]).forEach(b => add(b.c, b.v));
+  let red = false;
+  S.answers.forEach((ai, qi) => {
+    const o = s.qs[qi]?.opts[ai];
+    if(!o) return;
+    Object.entries(o.fx).forEach(([c,v]) => add(c,v));
+    if(o.red) red = true;
+  });
+  let list = Object.keys(score).filter(c => score[c] > 0 && allowed(c)).sort((a,b) => score[b]-score[a]).slice(0,3);
+  if(!list.length) list = s.fallback.filter(allowed).slice(0,3);
+  let g = list.length ? Math.max(...list.slice(0,2).map(c => CAUSES[c].g)) : 1;
+  if(red) g = 2;
+  return {list, g, red};
+}
+
+/* ---------- Navegacao ---------- */
+function go(view){ S.view = view; render(); }
+function back(){
+  const v = S.view;
+  if(v === "type" || v === "placa" || v === "polias" || v === "extensao" || v === "roca" || v === "check" || v === "gira" || v === "dicionario") return go("home");
+  if(v === "symptom") return go("type");
+  if(v === "question"){
+    if(S.qi === 0) return go("symptom");
+    S.qi--; S.answers.pop(); return render();
+  }
+  if(v === "result"){
+    const s = sym();
+    if(s.urgent) return go("symptom");
+    S.qi = s.qs.length - 1; S.answers.pop(); return go("question");
+  }
+}
+
+function topbar(){
+  const showBack = S.view !== "home";
+  $top.innerHTML = `
+    ${showBack ? `<button class="iconbtn" data-act="back" aria-label="Voltar">←</button>` : ""}
+    <div class="brand display"><span class="brand-dot">${boltIco}</span>Doutor do Motor</div>`;
+}
+
+function progress(){
+  const s = sym();
+  const total = 2 + (s && !s.urgent ? s.qs.length : 3);
+  let done = S.view === "type" ? 1 : S.view === "symptom" ? 2 : 2 + S.qi + 1;
+  let bars = "";
+  for(let i=0;i<total;i++) bars += `<span class="${i<done?"on":""}"></span>`;
+  return `<p class="step-label">Passo ${done} de ${total}</p><div class="progress" aria-hidden="true">${bars}</div>`;
+}
+
+/* ---------- Telas Principais ---------- */
+function viewHome(){
+  return `
+  <section class="hero">
+    ${mascot("happy")}
+    <h1 class="display" tabindex="-1">Seu motor tá estranho?</h1>
+    <p class="lead">Ferramenta prática pro produtor rural, marceneiro e pequenas oficinas. Descubra o defeito do motor da ordenha, ensiladeira ou serra sem enrolação!</p>
+    <button class="btn btn-yellow btn-big" data-act="start"><span class="ico" aria-hidden="true">🩺</span><span class="t">Começar diagnóstico rápido</span></button>
+  </section>
+
+  <h2 class="section-title display">Ferramentas & Habilidades</h2>
+  <p class="section-sub">Tudo o que você precisa saber pra cuidar do motor no sítio:</p>
+  <div class="stack">
+    <button class="btn" data-act="go" data-v="polias"><span class="ico" aria-hidden="true">⚙️</span><span><span class="t">Casamento de polias animado</span><span class="s">Calcule o diâmetro da correia e rotação (RPM)</span></span></button>
+    <button class="btn" data-act="go" data-v="extensao"><span class="ico" aria-hidden="true">📏</span><span><span class="t">Teste de extensão da roça</span><span class="s">Veja se o fio fino tá roubando força da máquina</span></span></button>
+    <button class="btn" data-act="go" data-v="roca"><span class="ico" aria-hidden="true">🚜</span><span><span class="t">Motores da Roça e Oficina</span><span class="s">Ordenheira, resfriador, picador e estufa de fumo</span></span></button>
+    <button class="btn" data-act="go" data-v="placa"><span class="ico" aria-hidden="true">🏷️</span><span><span class="t">Ler a placa do motor</span><span class="s">O que significa cv, 220/380V, FS e IP55</span></span></button>
+    <button class="btn" data-act="go" data-v="check"><span class="ico" aria-hidden="true">🧽</span><span><span class="t">Cuidados de rotina</span><span class="s">Checklist pra ele durar mais de 20 anos</span></span></button>
+    <button class="btn" data-act="go" data-v="gira"><span class="ico" aria-hidden="true">🌀</span><span><span class="t">Como o motor gira por dentro</span><span class="s">A física da indução explicada em 1 minuto</span></span></button>
+    <button class="btn" data-act="go" data-v="dicionario"><span class="ico" aria-hidden="true">📖</span><span><span class="t">Dicionário do eletricista</span><span class="s">Tradutor de termos técnicos pra língua da roça</span></span></button>
+  </div>
+
+  <div class="card note" style="margin-top:30px">
+    <p><strong>⚠️ Segurança em primeiro lugar:</strong> Sempre desligue o disjuntor e tire o plugue da tomada antes de colocar a mão em correia, hélice ou carcaça. Este aplicativo é um guia amigo e não dispensa um profissional de elétrica.</p>
+  </div>
+
+  <footer class="foot">
+    <p><strong>Doutor do Motor</strong> • Projeto de extensão universitária do curso de Engenharia Elétrica, disciplina Máquinas Elétricas e Acionamento.</p>
+    <p>Idealizado por Rafael Vidal em prol do homem do campo e pequenos negócios.</p>
+  </footer>`;
+}
+
+function viewType(){
+  return `${progress()}
+  <div class="qhead">${mascot("thinking","sm")}</div>
+  <div class="bubble"><h2 class="display" tabindex="-1">Que tipo de motor elétrico é?</h2><p>Isso define se vamos olhar capacitor, chave centrífuga ou fases da rede.</p></div>
+  <div class="stack">
+    ${Object.entries(TYPES).map(([k,o]) => `
+      <button class="btn ${S.type===k?"selected":""}" data-act="type" data-k="${k}">
+        <span class="ico display">${o.ico}</span><span><span class="t">${o.t}</span><span class="s">${o.s}</span></span>
+      </button>`).join("")}
+  </div>
+  <details class="hint">
+    <summary>Como descobrir se é mono ou trifásico?</summary>
+    <div class="in">
+      <p>• <strong>Olhe a plaqueta de metal:</strong> se tiver escrito <strong>1~</strong> é monofásico; se tiver <strong>3~</strong> é trifásico.</p>
+      <p>• <strong>Tem um 'bucho' cilíndrico preso em cima?</strong> Quase sempre é o capacitor do motor monofásico.</p>
+      <p>• <strong>Quantos fios entram nele?</strong> Se entram 2 ou 3 fios finos na tomada comum é monofásico; se chega cabo grosso com 3 ou 4 condutores em chave pesada, costuma ser trifásico.</p>
+    </div>
+  </details>`;
+}
+
+function viewSymptom(){
+  return `${progress()}
+  <div class="qhead">${mascot("thinking","sm")}</div>
+  <div class="bubble"><h2 class="display" tabindex="-1">O que está acontecendo com ele?</h2><p>Escolha o sintoma mais parecido com a lida de agora:</p></div>
+  <div class="grid2">
+    ${SYMPTOMS.map(s => `
+      <button class="btn ${s.urgent?"btn-pink":""}" data-act="sym" data-k="${s.id}">
+        <span class="ico" aria-hidden="true">${s.ico}</span><span class="t">${s.t}</span><span class="s">${s.s}</span>
+      </button>`).join("")}
+  </div>`;
+}
+
+function viewQuestion(){
+  const s = sym(), q = s.qs[S.qi];
+  return `${progress()}
+  <div class="qhead">${mascot("thinking","sm")}</div>
+  <div class="bubble"><h2 class="display" tabindex="-1">${q.q}</h2>${q.h?`<p>${q.h}</p>`:""}</div>
+  <div class="stack">
+    ${q.opts.map((o,i) => `<button class="btn" data-act="ans" data-i="${i}"><span class="t">${o.t}</span></button>`).join("")}
+  </div>`;
+}
+
+function causeCard(id, i){
+  const c = CAUSES[id];
+  if(!c) return "";
+  const tagCol = ["var(--green)","var(--yellow)","var(--red)"][c.g];
+  const tagTxt = ["Simples / Regulagem","Atenção / Manutenção","Grave / Perigo"][c.g];
+  return `<article class="card cause">
+    <span class="rank ${i===0?"first":""}">${i===0?"Mais provável no seu caso":"Também pode ser"}</span>
+    <h3 class="display">${c.t}</h3>
+    <span class="tag" style="background:${tagCol}">${tagTxt}</span>
+    <h4>O que você mesmo pode conferir (com o motor desligado):</h4>
+    <ul>${c.check.map(x=>`<li>${x}</li>`).join("")}</ul>
+    <h4>Quando e por que chamar o eletricista:</h4>
+    <p class="pro">${c.pro}</p>
+    <details><summary>Por que isso acontece? (Explicação simples)</summary><div class="in"><p>${c.why}</p></div></details>
+  </article>`;
+}
+
+function viewResult(){
+  const s = sym(), d = diagnose(), G = GRAV[d.g];
+  const urgentBlock = s.urgent ? `
+    <div class="card" style="margin-top:20px; border-color:var(--red); background:#FFF0F0">
+      <h2 class="display" style="color:var(--red)">🚨 Ação Imediata (Faça Agora)</h2>
+      <ol class="urgent-steps">
+        <li><strong>Desligue o disjuntor geral</strong> daquele circuito imediatamente, sem tocar na carcaça do motor ou da máquina.</li>
+        <li><strong>Não encoste</strong> em partes metálicas nem deixe animais ou outras pessoas chegarem perto.</li>
+        ${s.id==="queimado" ? `<li><strong>Em caso de princípio de fogo:</strong> NUNCA jogue água em equipamento elétrico! Use extintor de Pó Químico (ABC) ou Gás Carbônico (CO₂). Se não tiver, ligue pros Bombeiros no 193.</li>` : `<li><strong>Choque elétrico:</strong> Indica fuga direta de corrente e falta de aterramento confiável.</li>`}
+        <li>Chame um profissional de elétrica antes de tentar ligar de novo.</li>
+      </ol>
+    </div>` : "";
+  return `
+  <section class="verdict g${d.g}">
+    ${mascot(G.mood)}
+    <div><h2 class="display" tabindex="-1">${G.t}</h2><p>${G.s}</p></div>
+  </section>
+  ${urgentBlock}
+  <div class="card safety"><span class="big" aria-hidden="true">🔒</span><p><strong>Aviso de segurança obrigatório:</strong> Antes de encostar em correia, polia ou abrir a tampa traseira, desligue o disjuntor e tire o plugue da tomada. Nunca abra a caixa de fiação com o motor ligado na rede!</p></div>
+  <h2 class="section-title display" style="margin-top:16px">Causas prováveis apontadas pelo Doutor</h2>
+  <div>${d.list.map(causeCard).join("")}</div>
+  <div class="actions">
+    <button class="btn btn-green btn-big" data-act="share"><span class="ico" aria-hidden="true">📤</span><span class="t">Enviar resumo pro eletricista</span></button>
+    <a class="btn btn-big" href="https://wa.me/?text=${encodeURIComponent(summary())}" target="_blank" rel="noopener"><span class="ico" aria-hidden="true">💬</span><span class="t">Mandar direto no WhatsApp</span></a>
+    <button class="btn btn-yellow btn-big" data-act="restart"><span class="ico" aria-hidden="true">🔄</span><span class="t">Fazer outro diagnóstico</span></button>
+  </div>`;
+}
+
+/* ---------- SKILL: Casamento de Polias (Animada) ---------- */
+function viewPolias(){
+  // Calculo de relacao de transmissao e rpm final
+  const rpmMotor = S.rpmMotor;
+  const dM = S.dMotor;
+  const dQ = S.dMaq;
+  const rpmFinal = Math.round((rpmMotor * dM) / dQ);
+  const relacao = (dM / dQ).toFixed(2);
+  let statusTxt = "Rotação média tradicional";
+  let statusBg = "var(--green)";
+  if(rpmFinal > 3200){
+    statusTxt = "⚡ Alta rotação (cuidado com facas e pedras)";
+    statusBg = "var(--yellow)";
+  } else if(rpmFinal < 600){
+    statusTxt = "🐢 Redução forte (alta força de torque)";
+    statusBg = "var(--lilac)";
+  }
+
+  // Raio visual relativo
+  const r1 = Math.min(Math.max(16, (dM / 200) * 44), 50);
+  const r2 = Math.min(Math.max(16, (dQ / 200) * 44), 50);
+
+  return `
+  <h1 class="display" tabindex="-1">Casamento de Polias</h1>
+  <p class="lead">Descubra a rotação exata da sua ensiladeira, serra ou moenda trocando o tamanho das polias.</p>
+  
+  <div class="card">
+    <svg class="pulley-canvas" viewBox="0 0 320 150" role="img" aria-label="Duas polias conectadas por correia animada">
+      <!-- Correia externa animada -->
+      <path class="belt-track" d="M 70 ${75-r1} L 240 ${75-r2} A ${r2} ${r2} 0 0 1 240 ${75+r2} L 70 ${75+r1} A ${r1} ${r1} 0 0 1 70 ${75-r1} Z" fill="none" stroke="#000" stroke-width="6"/>
+      <!-- Polia Motor (Esquerda) -->
+      <g transform="translate(70,75)">
+        <circle cx="0" cy="0" r="${r1}" fill="#FFD23F" stroke="#000" stroke-width="4"/>
+        <circle cx="0" cy="0" r="${Math.max(6, r1*0.4)}" fill="#CAD1D9" stroke="#000" stroke-width="3"/>
+        <line x1="0" y1="${-r1+2}" x2="0" y2="${r1-2}" stroke="#000" stroke-width="3" stroke-linecap="round"/>
+        <line x1="${-r1+2}" y1="0" x2="${r1-2}" y2="0" stroke="#000" stroke-width="3" stroke-linecap="round"/>
+        <text x="0" y="${r1+24}" font-family="'Lilita One',Arial" font-size="12" text-anchor="middle" fill="#000">Motor: ${dM} mm</text>
+      </g>
+      <!-- Polia Maquina (Direita) -->
+      <g transform="translate(240,75)">
+        <circle cx="0" cy="0" r="${r2}" fill="#5AB0FF" stroke="#000" stroke-width="4"/>
+        <circle cx="0" cy="0" r="${Math.max(6, r2*0.4)}" fill="#CAD1D9" stroke="#000" stroke-width="3"/>
+        <line x1="0" y1="${-r2+2}" x2="0" y2="${r2-2}" stroke="#000" stroke-width="3" stroke-linecap="round"/>
+        <line x1="${-r2+2}" y1="0" x2="${r2-2}" y2="0" stroke="#000" stroke-width="3" stroke-linecap="round"/>
+        <text x="0" y="${r2+24}" font-family="'Lilita One',Arial" font-size="12" text-anchor="middle" fill="#000">Máquina: ${dQ} mm</text>
+      </g>
+    </svg>
+
+    <div class="slider-box">
+      <label><span>Polia no eixo do Motor:</span> <strong>${dM} mm</strong></label>
+      <input type="range" min="40" max="250" step="5" value="${dM}" data-act="slide-motor">
+    </div>
+
+    <div class="slider-box">
+      <label><span>Polia no eixo da Máquina:</span> <strong>${dQ} mm</strong></label>
+      <input type="range" min="40" max="350" step="5" value="${dQ}" data-act="slide-maq">
+    </div>
+
+    <div class="slider-box">
+      <label><span>Motor elétrico da roça:</span> <strong>${rpmMotor} RPM</strong></label>
+      <div style="display:flex; gap:10px; margin-top:6px">
+        <button class="field ${rpmMotor===1750?"on":""}" style="flex:1" data-act="set-rpm" data-v="1750">1750 RPM (4 polos - padrão)</button>
+        <button class="field ${rpmMotor===3500?"on":""}" style="flex:1" data-act="set-rpm" data-v="3500">3500 RPM (2 polos - rápido)</button>
+      </div>
+    </div>
+
+    <div class="rpm-meter">
+      <div style="font-size:.9rem; color:#444; font-weight:700">Velocidade final que a máquina vai girar:</div>
+      <div class="rpm-val">${rpmFinal} <span style="font-size:1.3rem">RPM</span></div>
+      <div class="rpm-badge" style="background:${statusBg}">${statusTxt} • Proporção ${relacao}:1</div>
+    </div>
+  </div>
+
+  <details class="hint" style="margin-top:16px">
+    <summary>Dica de ouro do colono: polia menor ou maior?</summary>
+    <div class="in">
+      <p>• <strong>Quer mais velocidade (ex.: serra circular):</strong> coloque polia MAIOR no motor e MENOR na serra.</p>
+      <p>• <strong>Quer mais força e menos rotação (ex.: moenda de cana, ensiladeira grossa):</strong> coloque polia PEQUENA no motor e GRANDE na máquina.</p>
+      <p>• <strong>Aviso de segurança:</strong> NUNCA use polia pequena demais no motor (abaixo de 60mm), pois a correia dobra muito forte e arrebenta rápido por fadiga.</p>
+    </div>
+  </details>`;
+}
+
+/* ---------- SKILL: Teste de Extensão da Roça (Voltímetro Animado) ---------- */
+function viewExtensao(){
+  // Calculo simplificado de queda de tensao em 220V cobre
+  // I aproximada = potCv * 4 A (em 220V)
+  const I = S.potCv * 4;
+  // Resistencia cobre = 0.0178 * L * 2 / S
+  const R = (0.0178 * S.distM * 2) / S.fioMm;
+  const quedaV = Math.round(I * R);
+  const vFinal = Math.max(120, 220 - quedaV);
+  const percQueda = ((quedaV / 220) * 100).toFixed(1);
+
+  // Angulo do voltimetro: 220V = 35deg, 180V = -35deg
+  const angulo = Math.min(45, Math.max(-55, (vFinal - 200) * 1.5));
+  let voltCor = "var(--green)";
+  let voltMsg = "Tensão excelente! O motor trabalha frio e rende tudo o que tem.";
+  let voltMood = "happy";
+  if(vFinal < 195 && vFinal >= 180){
+    voltCor = "var(--yellow)";
+    voltMsg = "Queda perigosa! O motor vai roncar, esquentar bastante e perder força nos picos.";
+    voltMood = "worried";
+  } else if(vFinal < 180){
+    voltCor = "var(--red)";
+    voltMsg = "Perigo de queimar! Tensão baixa demais. O enrolamento vai cozinhar o verniz.";
+    voltMood = "danger";
+  }
+
+  return `
+  <h1 class="display" tabindex="-1">Extensão & Fio na Roça</h1>
+  <p class="lead">Descubra se o fio fino tá roubando a força do motor no açude, paiol ou galinheiro.</p>
+
+  <div class="card">
+    <div class="volt-box">
+      <svg class="volt-svg" viewBox="0 0 220 120" role="img" aria-label="Voltímetro analógico marcando a voltagem da ponta">
+        <!-- Fundo do mostrador -->
+        <path d="M 20 105 A 90 90 0 0 1 200 105 Z" fill="#FFF4C2" stroke="#000" stroke-width="4"/>
+        <!-- Faixa vermelha <185V -->
+        <path d="M 32 105 A 78 78 0 0 1 70 42" fill="none" stroke="#FF5A52" stroke-width="12"/>
+        <!-- Faixa amarela 185-205V -->
+        <path d="M 70 42 A 78 78 0 0 1 125 28" fill="none" stroke="#FFD23F" stroke-width="12"/>
+        <!-- Faixa verde >205V -->
+        <path d="M 125 28 A 78 78 0 0 1 188 105" fill="none" stroke="#4BE08B" stroke-width="12"/>
+        <line x1="110" y1="105" x2="110" y2="30" stroke="#000" stroke-width="2" stroke-dasharray="2 3"/>
+        <text x="42" y="98" font-family="'Lilita One',Arial" font-size="11" fill="#000">160V</text>
+        <text x="110" y="24" font-family="'Lilita One',Arial" font-size="12" text-anchor="middle" fill="#000">200V</text>
+        <text x="178" y="98" font-family="'Lilita One',Arial" font-size="11" fill="#000">220V</text>
+        <!-- Ponteiro -->
+        <g class="meter-hand" style="transform:rotate(${angulo}deg)">
+          <line x1="110" y1="105" x2="110" y2="36" stroke="#000" stroke-width="4" stroke-linecap="round"/>
+          <circle cx="110" cy="105" r="9" fill="#000"/>
+        </g>
+      </svg>
+      <div style="font-family:'Lilita One',Arial; font-size:2.2rem; color:#000; margin-top:4px">${vFinal} Volts</div>
+      <div style="font-size:.9rem; font-weight:700; color:#444">Queda de ${quedaV} V (${percQueda}%) na ponta da máquina</div>
+    </div>
+
+    <div class="slider-box">
+      <label><span>Distância da tomada até o motor:</span> <strong>${S.distM} metros</strong></label>
+      <input type="range" min="5" max="300" step="5" value="${S.distM}" data-act="slide-dist">
+    </div>
+
+    <div class="slider-box">
+      <label><span>Bitola (grossura) do cabo de cobre:</span> <strong>${S.fioMm} mm²</strong></label>
+      <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-top:6px">
+        ${[1.5, 2.5, 4.0, 6.0, 10.0].map(mm => `
+          <button class="field ${S.fioMm===mm?"on":""}" data-act="set-fio" data-v="${mm}">${mm} mm²</button>
+        `).join("")}
+      </div>
+    </div>
+
+    <div class="slider-box">
+      <label><span>Potência do motor:</span> <strong>${S.potCv} cv (cavalos)</strong></label>
+      <div style="display:flex; gap:6px; margin-top:6px">
+        ${[1, 2, 3, 5, 7.5].map(cv => `
+          <button class="field ${S.potCv===cv?"on":""}" style="flex:1" data-act="set-cv" data-v="${cv}">${cv} cv</button>
+        `).join("")}
+      </div>
+    </div>
+
+    <div style="background:${voltCor}; border:3px solid var(--line); border-radius:12px; padding:12px; margin-top:14px; font-weight:700">
+      ${voltMsg}
+    </div>
+  </div>`;
+}
+
+/* ---------- SKILL: Motores da Roça e Oficina ---------- */
+function viewRoca(){
+  const MAQS = [
+    {ico:"🥛", t:"Ordenhadeira & Bomba de Vácuo", d:"Trabalha em ambiente de umidade extrema e amônia. O vapor do leite e a água de lavação penetram se a tampa não for vedada. Recomenda-se motor blindado IP55 e limpar correia toda semana."},
+    {ico:"❄️", t:"Resfriador de Leite a Granel", d:"Se parar no verão em dias quentes, azeda a produção inteira! O compressor parte com carga pesada. Exige fiação grossa dedicada direto do quadro, sem emendas, e proteção com relé de falta de fase se for trifásico."},
+    {ico:"🌾", t:"Picador, Triturador & Ensiladeira", d:"Vibração brutal e pó de sabugo e palha. O pó fino forma uma camada nas aletas que impede a carcaça de esfriar. Limpe as aletas com escova seca ao fim de cada dia de ensilagem."},
+    {ico:"🍂", t:"Estufa de Fumo (Secagem de Tabaco)", d:"Fica ligada dias e noites sem folga perto de fornalha quente (50°C a 70°C). O calor ambiente exige motor com Isolamento Classe F e hélice em perfeito estado para não torrar as bobinas."},
+    {ico:"🐔", t:"Ventiladores de Aviário & Pocilga", d:"Maravalha, penas e amônia atacam as peças de ferro e o verniz. Nunca jogue jato de lava-jato de alta pressão direto na carcaça do motor elétrico!"},
+    {ico:"💧", t:"Bomba de Sanga, Poço ou Açude", d:"Costuma ficar a 100 ou 200 metros do transformador. Extensão de fio fino mata a bomba por subtensão. Verifique também se a válvula de fundo de poço (cebolão) não está trancada de lodo."}
+  ];
+  return `
+  <h1 class="display" tabindex="-1">Motores da Roça e Oficina</h1>
+  <p class="lead">Particularidades e segredos dos motores elétricos nas atividades práticas do dia a dia:</p>
+  <div>
+    ${MAQS.map(m => `
+      <div class="farm-card">
+        <div class="farm-ico">${m.ico}</div>
+        <div>
+          <h3 class="display">${m.t}</h3>
+          <p>${m.d}</p>
+        </div>
+      </div>
+    `).join("")}
+  </div>
+  <div class="card note" style="margin-top:20px">
+    <p><strong>💡 Dica do Eletricista Rural:</strong> Guarde sempre o telefone de um rebobinador e do plantão da empresa de energia anotado na porta do quadro de energia do galpão.</p>
+  </div>`;
+}
+
+/* ---------- SKILL: Ler a Placa do Motor ---------- */
+const PLACA = [
+  {k:"3~", t:"Tipo de alimentação (Fases)", d:"3~ significa motor trifásico (3 fases vivas). Se na sua placa estiver 1~, o motor é monofásico (típico de tomadas residenciais)."},
+  {k:"2 cv", t:"Potência útil no eixo", d:"1 cv (cavalo-vapor) equivale a aprox. 736 Watts de força no eixo. É a força com que ele puxa a serra ou o triturador sem cair o giro."},
+  {k:"220/380 V", t:"Tensões de ligação", d:"Pode ser ligado em 220V (ligação triângulo) ou 380V (ligação estrela). Na rede trifásica comum, a ligação em 380V entre fases costuma ser o padrão mais econômico."},
+  {k:"5,8/3,4 A", t:"Corrente nominal (Amperes)", d:"O primeiro número é o consumo em 220V e o segundo em 380V. É esse número que o eletricista usa para regular o relé térmico e o disjuntor."},
+  {k:"1730 rpm", t:"Giro por minuto (Rotação)", d:"Voltas que o eixo dá por minuto em carga cheia. Fica abaixo de 1800 RPM por causa do 'escorregamento', que é o que cria a força de indução."},
+  {k:"60 Hz", t:"Frequência da rede", d:"Padrão brasileiro de 60 ciclos por segundo. Não use motores importados de 50 Hz sem verificar com eletricista, pois giram rápido demais e esquentam."},
+  {k:"FS 1,15", t:"Fator de Serviço (Folga)", d:"Significa que o motor suporta até 15% acima da sua capacidade de vez em quando sem queimar na hora. Mas não abuse todo dia!"},
+  {k:"IP55", t:"Grau de proteção da carcaça", d:"O primeiro 5 indica proteção contra poeira de marcenaria/grão; o segundo 5 indica proteção contra jatos de água de mangueira comum."},
+  {k:"Isol. F", t:"Classe de isolamento térmico", d:"O verniz especial de cobre aguenta até 155 °C contínuos dentro das bobinas sem derreter."},
+  {k:"η 84%", t:"Rendimento do motor", d:"De cada 100 partes de energia que entram do relógio de luz, 84 viram trabalho de giro no eixo e 16 viram calor. Quanto maior, menor a conta de luz."}
+];
+function viewPlaca(){
+  const f = PLACA.find(p => p.k === S.placaField);
+  return `
+  <h1 class="display" tabindex="-1">Ler a Placa do Motor</h1>
+  <p class="lead">Toda placa de motor traz esses dados padronizados. Toque em qualquer campo para entender:</p>
+  <div class="placa">
+    <span class="screw tl"></span><span class="screw tr"></span>
+    <span class="screw bl"></span><span class="screw br"></span>
+    <p class="placa-brand">MOTOR DE INDUÇÃO TRIFÁSICO</p>
+    <p class="placa-sub">INDÚSTRIA BRASILEIRA • PADRÃO ABNT / NBR 17094</p>
+    <div class="fields">
+      ${PLACA.map(p => `<button class="field ${S.placaField===p.k?"on":""}" data-act="field" data-k="${p.k}" aria-pressed="${S.placaField===p.k}">${p.k}</button>`).join("")}
+    </div>
+  </div>
+  <div class="card explain">
+    ${f ? `<h3 class="display">${f.t}</h3><p>${f.d}</p>` : `<h3 class="display">Toque num número da placa</h3><p class="muted">A explicação simples e para que serve aparece aqui sem recarregar a tela.</p>`}
+  </div>`;
+}
+
+/* ---------- SKILL: Checklist Cuidados de Rotina ---------- */
+const CHECK = [
+  {g:"Toda semana (Na lida)", items:[
+    "Escutar com atenção se tem chiado de areia ou batida no motor",
+    "Sentir se tem cheiro de verniz quente ou borracha queimada",
+    "Passar escova seca para tirar pó, serragem ou palha das aletas (motor desligado)",
+    "Ver se não tem teia de aranha ou ninho de marimbondo na grade da ventoinha"
+  ]},
+  {g:"Todo mês (No galpão)", items:[
+    "Apertar o meio da correia: ela deve ceder só de 1 a 2 cm com o dedo",
+    "Conferir com chave se os parafusos da sapata na base estão bem firmes",
+    "Observar se o motor não está demorando mais do que o normal para atingir o embalo",
+    "Checar se a fiação não tem emenda descascada ou esquentando na tomada"
+  ]},
+  {g:"Todo ano (Revisão da entressafra)", items:[
+    "Chamar um eletricista para medir o isolamento com aparelho Megômetro",
+    "Lubrificar ou mandar trocar os rolamentos antes de começarem a arranhar",
+    "Revisar o aperto dos parafusos dentro do quadro de disjuntores da propriedade",
+    "Verificar se a haste do fio terra continua firme e sem ferrugem no chão"
+  ]}
+];
+function loadChecks(){ try{ return JSON.parse(localStorage.getItem("ddm-check-v2")) || {}; }catch(e){ return {}; } }
+function saveChecks(o){ try{ localStorage.setItem("ddm-check-v2", JSON.stringify(o)); }catch(e){} }
+function viewCheck(){
+  const st = loadChecks();
+  return `
+  <h1 class="display" tabindex="-1">Cuidados de Rotina</h1>
+  <p class="lead">Motor elétrico bem cuidado no sítio dura 20 a 30 anos sem queimar. Marque o que você já fez:</p>
+  ${CHECK.map((grp,gi) => `
+    <section class="card">
+      <h2 class="display">${grp.g}</h2>
+      ${grp.items.map((it,ii) => { const id=`c${gi}-${ii}`; return `
+        <label class="chk"><input type="checkbox" data-act="chk" data-k="${id}" ${st[id]?"checked":""}><span>${it}</span></label>`; }).join("")}
+    </section>`).join("")}
+  <div class="actions"><button class="btn btn-big" data-act="resetchk"><span class="ico" aria-hidden="true">🧹</span><span class="t">Desmarcar tudo</span></button></div>`;
+}
+
+/* ---------- SKILL: Como o Motor Gira (Infográfico Animado) ---------- */
+function viewGira(){
+  return `
+  <h1 class="display" tabindex="-1">Como o Motor Gira</h1>
+  <p class="lead">Sem contas difíceis. A mágica da eletricidade em 3 passos:</p>
+  <div class="card">
+    <svg class="field-anim" viewBox="0 0 180 180" role="img" aria-label="Animação do campo magnético girando e rotor acompanhando">
+      <!-- Carcaça e bobinas do estator -->
+      <circle cx="90" cy="90" r="82" fill="#FFF4C2" stroke="#000" stroke-width="5"/>
+      <!-- Bobinas dos 4 polos -->
+      <g stroke="#000" stroke-width="4" fill="#5AB0FF">
+        <rect x="78" y="10" width="24" height="24" rx="5"/>
+        <rect x="78" y="146" width="24" height="24" rx="5"/>
+        <rect x="10" y="78" width="24" height="24" rx="5"/>
+        <rect x="146" y="78" width="24" height="24" rx="5"/>
+      </g>
+      <!-- Linha tracejada do campo girante -->
+      <circle cx="90" cy="90" r="58" fill="none" stroke="#000" stroke-width="2.5" stroke-dasharray="5 5" opacity=".4"/>
+      <!-- Rotor girando no centro -->
+      <g class="spin">
+        <circle cx="90" cy="90" r="40" fill="#FFD23F" stroke="#000" stroke-width="5"/>
+        <!-- Ranhuras do rotor gaiola de esquilo -->
+        <line x1="90" y1="52" x2="90" y2="128" stroke="#000" stroke-width="3" stroke-linecap="round" opacity=".5"/>
+        <line x1="52" y1="90" x2="128" y2="90" stroke="#000" stroke-width="3" stroke-linecap="round" opacity=".5"/>
+        <!-- Vetor de forca vermelho -->
+        <path d="M90 90 L90 54" stroke="#000" stroke-width="7" stroke-linecap="round"/>
+        <path d="M78 62 L90 48 L102 62 Z" fill="#FF5A52" stroke="#000" stroke-width="4" stroke-linejoin="round"/>
+      </g>
+      <!-- Ponta do eixo -->
+      <circle cx="90" cy="90" r="8" fill="#000"/>
+    </svg>
+
+    <ol class="steps">
+      <li><strong>As bobinas viram eletroímãs:</strong> Quando a energia elétrica entra nos fios de cobre do estator (a parte parada), cria uma força magnética invisível.</li>
+      <li><strong>O campo magnético fica rodando:</strong> Como a corrente é alternada e muda 60 vezes por segundo, o magnetismo pula de uma bobina para outra em círculo, dando 1.800 ou 3.600 voltas por minuto.</li>
+      <li><strong>O rotor corre atrás do campo:</strong> O rotor (a parte do meio que gira) é arrastada por esse magnetismo. Ele gira um pouquinho mais devagar que o campo (a 1.730 RPM). Esse pequeno atraso se chama <em>escorregamento</em> e é ele que produz a força de arrasto!</li>
+    </ol>
+  </div>
+
+  <details class="hint" style="margin-top:22px">
+    <summary>E por que o motor monofásico precisa de capacitor?</summary>
+    <div class="in"><p>No monofásico (2 fios), a corrente só vai e vem numa linha reta, sem girar sozinha. É como um pedal de bicicleta parado em pé no topo: você não sabe se vai pra frente ou pra trás. O capacitor cria um empurrãozinho numa segunda bobina torta, forçando o rotor a escolher o sentido correto e começar a girar.</p></div>
+  </details>
+  <details class="hint" style="margin-top:14px">
+    <summary>Por que o motor esquenta tanto na partida?</summary>
+    <div class="in"><p>Quando o eixo está parado no primeiro segundo, não existe contra-força magnética interna. Por um instante, é quase como se a tomada estivesse em curto-circuito direto. O motor puxa até 8 vezes mais corrente do que o normal até pegar velocidade!</p></div>
+  </details>`;
+}
+
+/* ---------- SKILL: Dicionário do Eletricista Rural ---------- */
+function viewDicionario(){
+  const TERMOS = [
+    {t:"Capacitor Permanente vs Partida", d:"O de partida é aquele cilindro preto que só serve pra dar o arranque e logo desliga pela chave centrífuga. O permanente (geralmente branco ou alumínio) fica ligado o tempo todo ajudando o motor a ter torque estável."},
+    {t:"Chave Estrela-Triângulo", d:"Usada em motores trifásicos grandes (acima de 5 cv). Liga primeiro fraco em 'Estrela' pra não derrubar a luz do sítio na partida, e depois bate pra 'Triângulo' onde entrega toda a força."},
+    {t:"Disjuntor Curva C (O amigo do motor)", d:"Disjuntor comum de casa (curva B) cai à toa com o pico de partida do motor. O eletricista coloca disjuntor de curva C, que espera 2 a 3 segundos antes de desarmar, dando tempo do motor embalar."},
+    {t:"Relé Térmico", d:"Aparelhinho que fica preso na contatora. Ele tem lâminas que esquentam junto com a corrente. Se o motor ficar pesado por minutos, ele desarma o botão antes de queimar o cobre."},
+    {t:"Megômetro", d:"Aparelho do eletricista que injeta 500V ou 1.000V de teste nas bobinas pra ver se a corrente não está vazando pela carcaça através da umidade."},
+    {t:"Chave Boia Elétrica", d:"Sensor com uma esfera dentro que sobe e desce na caixa d'água ou no açude. Se a boia ficar com defeito, o motor pode ficar ligando e desligando a cada 10 segundos até queimar."}
+  ];
+  return `
+  <h1 class="display" tabindex="-1">Dicionário do Eletricista</h1>
+  <p class="lead">Para você conversar de igual para igual quando comprar peças ou falar com a oficina:</p>
+  <div class="stack">
+    ${TERMOS.map(x => `
+      <div class="card" style="padding:14px">
+        <h3 class="display" style="font-size:1.25rem; color:#0A2540">${x.t}</h3>
+        <p style="margin:6px 0 0; font-size:.95rem">${x.d}</p>
+      </div>
+    `).join("")}
+  </div>`;
+}
+
+/* ---------- Resumo Formatado ---------- */
+function summary(){
+  const s = sym(); if(!s) return "";
+  const d = diagnose();
+  let t = `Doutor do Motor - Resumo do Diagnóstico\n\n`;
+  t += `🔧 Tipo do Motor: ${TYPES[S.type]?.t || "Não informado"}\n`;
+  t += `⚠️ Sintoma observado: ${s.t}\n\n`;
+  if(!s.urgent && s.qs){
+    t += `Perguntas e respostas:\n`;
+    s.qs.forEach((q,i) => {
+      if(S.answers[i] !== undefined && q.opts[S.answers[i]]){
+        t += `• ${q.q} → ${q.opts[S.answers[i]].t}\n`;
+      }
+    });
+    t += `\n`;
+  }
+  t += `🚦 Gravidade apontada: ${GRAV[d.g].t}\n\n`;
+  t += `🔍 Causas mais prováveis:\n`;
+  t += d.list.map((c,i) => `${i+1}. ${CAUSES[c].t}`).join("\n");
+  t += `\n\nGerado pelo app Doutor do Motor • Extensão Universitária de Engenharia Elétrica`;
+  return t;
+}
+function toast(msg){
+  const el = document.getElementById("toast");
+  el.textContent = msg; el.classList.add("show");
+  clearTimeout(toast._t); toast._t = setTimeout(() => el.classList.remove("show"), 2400);
+}
+async function copyText(txt){
+  try{ await navigator.clipboard.writeText(txt); return true; }
+  catch(e){
+    try{
+      const ta = document.createElement("textarea"); ta.value = txt; ta.style.position="fixed"; ta.style.opacity="0";
+      document.body.appendChild(ta); ta.select(); const ok = document.execCommand("copy"); ta.remove(); return ok;
+    }catch(e2){ return false; }
+  }
+}
+async function share(){
+  const txt = summary();
+  if(navigator.share){
+    try{ await navigator.share({title:"Doutor do Motor - Diagnóstico", text:txt}); return; }catch(e){ if(e && e.name==="AbortError") return; }
+  }
+  toast(await copyText(txt) ? "Resumo copiado com sucesso!" : "Não foi possível copiar");
+}
+
+/* ---------- Renderizacao e Eventos ---------- */
+function render(keep){
+  topbar();
+  const map = {
+    home:viewHome, type:viewType, symptom:viewSymptom, question:viewQuestion, result:viewResult,
+    placa:viewPlaca, polias:viewPolias, extensao:viewExtensao, roca:viewRoca, check:viewCheck, gira:viewGira, dicionario:viewDicionario
+  };
+  $app.innerHTML = map[S.view] ? map[S.view]() : viewHome();
+  if(keep) return;
+  window.scrollTo(0,0);
+  const h = $app.querySelector("[tabindex='-1']"); if(h) h.focus({preventScroll:true});
+}
+
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-act]"); if(!b) return;
+  const a = b.dataset.act;
+  if(a === "back") back();
+  else if(a === "start"){ S.type=null; S.sym=null; S.qi=0; S.answers=[]; go("type"); }
+  else if(a === "go") go(b.dataset.v);
+  else if(a === "type"){ S.type = b.dataset.k; go("symptom"); }
+  else if(a === "sym"){ S.sym = b.dataset.k; S.qi = 0; S.answers = []; go(sym().urgent ? "result" : "question"); }
+  else if(a === "ans"){
+    S.answers[S.qi] = +b.dataset.i;
+    if(S.qi < sym().qs.length - 1){ S.qi++; render(); } else go("result");
+  }
+  else if(a === "share") share();
+  else if(a === "restart"){ S.type=null; S.sym=null; S.qi=0; S.answers=[]; go("type"); }
+  else if(a === "field"){ S.placaField = b.dataset.k; render(true); const x=$app.querySelector(`.field[data-k="${CSS.escape(S.placaField)}"]`); if(x) x.focus(); }
+  else if(a === "resetchk"){ saveChecks({}); render(true); toast("Checklist zerado!"); }
+  else if(a === "set-rpm"){ S.rpmMotor = +b.dataset.v; render(true); }
+  else if(a === "set-fio"){ S.fioMm = +b.dataset.v; render(true); }
+  else if(a === "set-cv"){ S.potCv = +b.dataset.v; render(true); }
+});
+
+document.addEventListener("input", e => {
+  const el = e.target;
+  if(!el.dataset) return;
+  if(el.dataset.act === "slide-motor"){ S.dMotor = +el.value; render(true); }
+  else if(el.dataset.act === "slide-maq"){ S.dMaq = +el.value; render(true); }
+  else if(el.dataset.act === "slide-dist"){ S.distM = +el.value; render(true); }
+});
+
+document.addEventListener("change", e => {
+  const el = e.target;
+  if(el.dataset && el.dataset.act === "chk"){ const st = loadChecks(); st[el.dataset.k] = el.checked; saveChecks(st); }
+});
+
+render();
+</script>
+</body>
+</html>
