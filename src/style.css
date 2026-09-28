@@ -1198,6 +1198,198 @@ details .in p {
   color: #222;
 }
 
+/* ============================================================
+   DICIONÁRIO DO ELETRICISTA ENRIQUECIDO
+   ============================================================ */
+.dict-search-box {
+  position: relative;
+  margin-bottom: 12px;
+}
+
+.dict-search-input {
+  width: 100%;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 12px 42px 12px 14px;
+  background: #fff;
+  border: 3px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 3px 3px 0 var(--shadow);
+  color: #000;
+  outline: none;
+  transition: transform 0.08s, box-shadow 0.08s;
+}
+
+.dict-search-input:focus {
+  border-color: #000;
+  box-shadow: 4px 4px 0 var(--shadow);
+  transform: translate(-1px, -1px);
+}
+
+.dict-search-clear {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  color: #666;
+}
+
+.dict-pills {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px 2px 12px;
+  margin-bottom: 12px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.dict-pills::-webkit-scrollbar {
+  display: none;
+}
+
+.dict-pill {
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 7px 12px;
+  border: 2.5px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: #000;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 2px 2px 0 var(--shadow);
+  transition: transform 0.08s, background 0.08s;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.dict-pill:hover {
+  background: var(--cream);
+}
+
+.dict-pill:active {
+  transform: translate(2px, 2px);
+  box-shadow: 0 0 0;
+}
+
+.dict-pill.active {
+  background: var(--yellow);
+  box-shadow: 3px 3px 0 var(--shadow);
+  transform: translate(-1px, -1px);
+}
+
+.dict-count {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--on-bg-soft);
+  margin-bottom: 12px;
+}
+
+.dict-card {
+  background: var(--surface);
+  border: 3px solid var(--line);
+  border-radius: 14px;
+  box-shadow: 3.5px 3.5px 0 var(--shadow);
+  padding: 14px 16px;
+  margin-bottom: 14px;
+}
+
+.dict-card-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.dict-card-ico {
+  font-size: 1.8rem;
+  line-height: 1;
+  width: 44px;
+  height: 44px;
+  border: 2px solid var(--line);
+  border-radius: 10px;
+  background: var(--cream);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.dict-card-title {
+  flex: 1;
+}
+
+.dict-card-title h3 {
+  font-size: 1.25rem;
+  line-height: 1.15;
+  color: #0A2540;
+}
+
+.dict-card-alias {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #555;
+  margin-top: 2px;
+}
+
+.dict-cat-tag {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: #f1f5f9;
+  border: 1.5px solid var(--line);
+  border-radius: 6px;
+  padding: 2px 6px;
+  margin-top: 4px;
+}
+
+.dict-box {
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin-top: 8px;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.dict-box.what {
+  background: #f8fafc;
+  border-left: 4px solid var(--blue);
+}
+
+.dict-box.bad {
+  background: #fff1f2;
+  border-left: 4px solid var(--red);
+  color: #9f1239;
+}
+
+.dict-box.tip {
+  background: #ecfdf5;
+  border-left: 4px solid var(--green);
+  color: #065f46;
+}
+
+.dict-box-lbl {
+  font-weight: 800;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 2px;
+  letter-spacing: 0.02em;
+}
+
+.dict-box.what .dict-box-lbl { color: #0284c7; }
+.dict-box.bad .dict-box-lbl { color: #e11d48; }
+.dict-box.tip .dict-box-lbl { color: #059669; }
+
 /* toast */
 .toast {
   position: fixed;

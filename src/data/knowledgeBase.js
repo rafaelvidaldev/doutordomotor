@@ -466,11 +466,324 @@ export const MAQUINAS = [
   { ico: "💧", t: "Bomba de Sanga, Poço ou Açude", d: "Costuma ficar a 100 ou 200 metros do transformador. Extensão de fio fino mata a bomba por subtensão. Verifique também se a válvula de fundo de poço (cebolão) não está trancada de lodo." }
 ];
 
-export const TERMOS = [
-  { t: "Capacitor Permanente vs Partida", d: "O de partida é aquele cilindro preto que só serve pra dar o arranque e logo desliga pela chave centrífuga. O permanente (geralmente branco ou alumínio) fica ligado o tempo todo ajudando o motor a ter torque estável." },
-  { t: "Chave Estrela-Triângulo", d: "Usada em motores trifásicos grandes (acima de 5 cv). Liga primeiro fraco em 'Estrela' pra não derrubar a luz do sítio na partida, e depois bate pra 'Triângulo' onde entrega toda a força." },
-  { t: "Disjuntor Curva C (O amigo do motor)", d: "Disjuntor comum de casa (curva B) cai à toa com o pico de partida do motor. O eletricista coloca disjuntor de curva C, que espera 2 a 3 segundos antes de desarmar, dando tempo do motor embalar." },
-  { t: "Relé Térmico", d: "Aparelhinho que fica preso na contatora. Ele tem lâminas que esquentam junto com a corrente. Se o motor ficar pesado por minutos, ele desarma o botão antes de queimar o cobre." },
-  { t: "Megômetro", d: "Aparelho do eletricista que injeta 500V ou 1.000V de teste nas bobinas pra ver se a corrente não está vazando pela carcaça através da umidade." },
-  { t: "Chave Boia Elétrica", d: "Sensor com uma esfera dentro que sobe e desce na caixa d'água ou no açude. Se a boia ficar com defeito, o motor pode ficar ligando e desligando a cada 10 segundos até queimar." }
+export const DICT_CATS = [
+  { id: "todos", t: "Todos", ico: "📖" },
+  { id: "partes", t: "Partes do Motor", ico: "⚡" },
+  { id: "eletrica", t: "Elétrica & Proteção", ico: "🎛️" },
+  { id: "rede", t: "Rede & Energia", ico: "🔌" },
+  { id: "mecanica", t: "Mecânica & Polias", ico: "🚜" },
+  { id: "testes", t: "Testes & Oficina", ico: "🩺" }
 ];
+
+export const TERMOS = [
+  // --- PARTES DO MOTOR ---
+  {
+    id: "estator",
+    cat: "partes",
+    ico: "⚡",
+    t: "Estator",
+    alias: "O corpo fixo com as bobinas de cobre",
+    d: "É a carcaça de ferro fundido com as ranhuras onde ficam alojados os fios de cobre esmaltados. Quando a energia entra, o estator cria um campo magnético invisível que gira a 1.800 ou 3.600 rotações por minuto.",
+    bad: "Se as bobinas esquentarem demais, o esmalte isolante derrete e os fios encostam uns nos outros, soltando fumaça preta e cheiro acre inconfundível de verniz queimado.",
+    tip: "Motor com o estator queimado não tem conserto caseiro: precisa ir para uma oficina de confiança para ser rebobinado com fio novo."
+  },
+  {
+    id: "rotor",
+    cat: "partes",
+    ico: "🌀",
+    t: "Rotor Gaiola de Esquilo",
+    alias: "O miolo de ferro que gira no eixo",
+    d: "O cilindro metálico prensado no eixo do motor. Leva esse nome porque suas barras internas de alumínio fundido lembram uma rodinha de exercício de esquilo ou hamster. Ele é arrastado pelo magnetismo do estator.",
+    bad: "Quase nunca estraga sozinho. Porém, se os rolamentos estourarem ou o eixo empenar, o rotor raspa nas lâminas do estator, travando o motor com barulho de ferro raspando.",
+    tip: "Com o motor fora da tomada, rode o eixo com os dedos: se sentir peso ou atrito seco de raspagem, não ligue na energia."
+  },
+  {
+    id: "centrifuga",
+    cat: "partes",
+    ico: "⏱️",
+    t: "Chave Centrífuga e Platinado",
+    alias: "O interruptor automático do arranque",
+    d: "Peça mecânica com molas e contatos elétricos montada na traseira dos motores monofásicos. Ela mantém o capacitor de partida ligado no primeiro segundo e, quando o motor atinge 75% da rotação, a força do giro abre os contatos e desliga o capacitor.",
+    bad: "Se colar com faísca (travada fechada), o capacitor ferve e explode em 1 minuto. Se ficar aberta ou suja de pó de serra/grão, o motor não arranca sozinho e fica só zumbindo.",
+    tip: "Em marcenarias e engenhos, o pó fino entra na tampa e trava o platinado. Um sopro forte com bico de ar comprimido resolve grande parte dos problemas."
+  },
+  {
+    id: "rolamento",
+    cat: "partes",
+    ico: "⚙️",
+    t: "Rolamento Blindado (Linha 6200)",
+    alias: "As esferas de aço que sustentam o eixo",
+    d: "Conjunto de anéis e esferas de aço engraxadas que seguram as duas pontas do eixo nas tampas dianteira e traseira, permitindo que ele gire soltinho sem atrito.",
+    bad: "Começa com um zumbido fino que vira ronco grave de britadeira. As tampas de ferro fundido esquentam muito e o motor perde rendimento.",
+    tip: "No sítio e oficina, compre sempre rolamento com vedação de borracha dupla (marcação 2RS ou DDU), que impede entrada de pó de milho, terra e umidade."
+  },
+  {
+    id: "ventoinha",
+    cat: "partes",
+    ico: "💨",
+    t: "Ventoinha e Aletas de Refrigeração",
+    alias: "O radiador a ar do motor",
+    d: "A hélice de plástico na traseira e as aletas (canaletas de ferro fundido) ao longo do corpo. O motor não usa água: ele se resfria soprando ar frio sobre essas canaletas de ferro.",
+    bad: "Se as pás da hélice quebrarem ou as aletas entupirem de palha, feno ou serragem, o calor fica preso dentro e cozinha o motor mesmo trabalhando com carga leve.",
+    tip: "Passe uma vassourinha ou escova de aço seca toda semana nas canaletas do picador e da ordenhadeira. Nunca lave com água sob pressão com o motor quente!"
+  },
+  {
+    id: "placa_dados",
+    cat: "partes",
+    ico: "🏷️",
+    t: "Placa de Identificação Metálica",
+    alias: "O documento de nascimento do motor",
+    d: "Chapinha de metal rebitada na lateral contendo os dados de projeto: potência (cv/kW), voltagens (220/380V), amperagem nominal (A), rotação (RPM), IP e Fator de Serviço.",
+    bad: "Com o tempo, ferrugem, poeira e produtos de lavagem apagam os números estampados.",
+    tip: "Tire uma foto bem nítida da placa com o celular (ou use o leitor de fotos do app) e anote os dados na parede do galpão antes que a chapa enferruje."
+  },
+  {
+    id: "caixa_ligacao",
+    cat: "partes",
+    ico: "📦",
+    t: "Caixa de Ligação",
+    alias: "A tampa dos bornes e fios",
+    d: "Caixinha quadrada na parte superior ou lateral do motor onde chegam os cabos de energia e onde são feitas as conexões dos 6 ou 12 fios internos.",
+    bad: "Conexões frouxas ou fitas isolantes velhas geram faíscas invisíveis (mau contato), esquentam os cabos e derretem a isolação, encostando a fase na carcaça.",
+    tip: "Use conectores de porcelana ou terminais prensados com prensacabo emborrachado na entrada para vedar contra jatos de água e ratos."
+  },
+
+  // --- ELÉTRICA & PROTEÇÃO ---
+  {
+    id: "cap_partida",
+    cat: "eletrica",
+    ico: "🔋",
+    t: "Capacitor de Partida (Eletrolítico)",
+    alias: "O empurrão preto de arranque",
+    d: "Cilindro plástico preto com 2 fios, presente em motores monofásicos de 110V/220V. Ele armazena energia e joga um impulso elétrico violento na bobina auxiliar durante apenas 1 a 2 segundos para tirar a máquina da inércia.",
+    bad: "Estufa a tampa de borracha, vaza óleo preto, queima o cheiro característico de circuito frito ou simplesmente abre. O motor para de arrancar e fica só num zumbido parado.",
+    tip: "Se você ajudar a polia com a mão (com cuidado e sem correia!) e ele embalar, a certeza é de quase 100% de que o capacitor de partida ou o platinado pifou."
+  },
+  {
+    id: "cap_permanente",
+    cat: "eletrica",
+    ico: "🛢️",
+    t: "Capacitor Permanente (Óleo / Filme)",
+    alias: "O parceiro contínuo do giro",
+    d: "Geralmente com carcaça de plástico branco ou alumínio metálico. Fica conectado o tempo todo enquanto o motor estiver ligado, mantendo a força, o torque e a estabilidade da rotação.",
+    bad: "Quando perde capacitância, o motor parte normalmente, mas perde força com qualquer esforço, esquenta rápido e engasga no serviço pesado.",
+    tip: "Nunca coloque capacitor de partida no lugar do permanente! O de partida não suporta ficar ligado contínuo e explode em poucos minutos."
+  },
+  {
+    id: "contatora",
+    cat: "eletrica",
+    ico: "🎛️",
+    t: "Contatora de Força",
+    alias: "A chave magnética de liga/desliga",
+    d: "Interruptor eletromagnético blindado dentro do painel. Ao apertar o botão verde, uma bobina puxa os contatos internos com um estalo seco ('CLAC!') e liga todas as fases ao mesmo tempo.",
+    bad: "Os contatos internos de prata vão carbonizando com as faíscas. Se um deles queimar e não fechar, o motor trifásico tenta rodar com apenas 2 fios e queima por falta de fase.",
+    tip: "Se a contatora ficar vibrando e zumbindo feito uma vespa, pode ter formiga, poeira de serra ou ferrugem no núcleo de ferro do eletroímã."
+  },
+  {
+    id: "rele_termico",
+    cat: "eletrica",
+    ico: "🛡️",
+    t: "Relé Térmico (Bimetálico)",
+    alias: "O salva-vidas da contatora",
+    d: "Aparelhinho acoplado embaixo da contatora. Possui lâminas de metais diferentes que se aquecem com a passagem da corrente. Se a máquina ficar pesada e o motor puxar corrente demais por minutos, ele desarma o comando antes do cobre queimar.",
+    bad: "Se estiver desregulado ou quebrado, deixa o motor queimar sem desarmar nada, ou fica desarmando à toa com qualquer carga leve.",
+    tip: "O botão giratório frontal deve ser ajustado pelo eletricista exatamente no número da corrente nominal (A) indicado na placa do motor."
+  },
+  {
+    id: "disjuntor_c",
+    cat: "eletrica",
+    ico: "⚡",
+    t: "Disjuntor Termomagnético Curva C",
+    alias: "O disjuntor amigo dos motores",
+    d: "Disjuntor feito especialmente para aguentar o pico de partida das máquinas elétricas (que puxam de 5 a 8 vezes a corrente normal por 2 segundos) sem desarmar falsamente.",
+    bad: "Disjuntores residenciais comuns de Curva B desarmam na hora que você liga a serra ou ensiladeira. Já disjuntores com amperagem exagerada nunca desarmam e deixam o motor queimar.",
+    tip: "Olhe a letrinha na frente do disjuntor: deve começar com 'C' (ex.: C16, C25, C32). Para cargas ultra pesadas como britadeiras, usa-se Curva D."
+  },
+  {
+    id: "disjuntor_dr",
+    cat: "eletrica",
+    ico: "🦺",
+    t: "Disjuntor DR (Diferencial Residual)",
+    alias: "O protetor contra choque elétrico",
+    d: "Dispositivo salva-vidas que compara a corrente que entra com a que sai. Se apenas 30 milésimos de Ampere vazarem para a terra ou para uma pessoa, ele desarma em 0,02 segundo.",
+    bad: "Se o motor molhar com chuva ou tiver umidade infiltrada nas bobinas, o DR não deixa ligar de jeito nenhum.",
+    tip: "Se o DR desarmar ao ligar o motor, nunca retire o DR! Isso é aviso de perigo de morte por choque na carcaça."
+  },
+  {
+    id: "chave_boia",
+    cat: "eletrica",
+    ico: "💧",
+    t: "Chave Boia Elétrica de Nível",
+    alias: "O piloto automático de poços e caixas",
+    d: "Sensor vedado com uma esfera de aço que sobe e desce na água. Quando o nível sobe ou desse, a esfera rola e aciona um contato elétrico para ligar ou desligar a bomba de água.",
+    bad: "Cabo ressecado de sol pode vazar água para dentro, travando o contato ligado e fazendo a bomba trabalhar a seco até queimar o selo mecânico.",
+    tip: "Deixe sobra de cabo suficiente para a boia ter raio de giro livre sem enroscar nos canos ou nas paredes da cisterna."
+  },
+  {
+    id: "soft_starter",
+    cat: "eletrica",
+    ico: "📟",
+    t: "Soft-Starter e Inversor de Frequência",
+    alias: "A partida suave e controle de velocidade",
+    d: "Equipamentos eletrônicos que aceleram o motor suavemente como se fosse um acelerador de trator, eliminando o tranco na correia e o pico na rede de energia do sítio.",
+    bad: "Acusam alarmes em visor numérico (ex.: sobretensão, sobrecarga, perda de fase). São sensíveis a raios e umidade excessiva.",
+    tip: "Ideais para motores grandes (acima de 7,5 cv) no meio rural, onde a partida direta derrubaria a voltagem da linha inteira."
+  },
+
+  // --- REDE & ENERGIA ---
+  {
+    id: "subtensao",
+    cat: "rede",
+    ico: "📉",
+    t: "Queda de Tensão (Subtensão)",
+    alias: "A eletricidade fraca da roça",
+    d: "Quando a voltagem na tomada do motor fica abaixo do valor normal (por exemplo, chega 185V em vez de 220V) devido à distância longa do transformador ou extensão de fio fino.",
+    bad: "O motor perde torque de forma brutal. Para tentar girar, as bobinas puxam mais corrente, o fio esquenta como brasa e o verniz queima em poucos dias.",
+    tip: "Use o Teste de Extensão da Roça aqui no app para dimensionar a bitola certa do fio e evitar perder seu motor."
+  },
+  {
+    id: "falta_fase",
+    cat: "rede",
+    ico: "⚠️",
+    t: "Falta de Fase",
+    alias: "O perigo fatal do motor trifásico",
+    d: "Acontece quando uma das 3 fases vivas da rede queima no fusível do poste, um galho quebra o fio ou a contatora falha, deixando o motor funcionando com apenas 2 fios.",
+    bad: "Se estiver desligado, não parte e solta um zumbido grave horrível. Se estiver em movimento, a corrente dobra nas bobinas restantes e queima o motor em menos de 2 minutos!",
+    tip: "Instale um 'Relé de Falta de Fase' no quadro do motor trifásico. É uma proteção barata que evita prejuízos de milhares de reais."
+  },
+  {
+    id: "aterramento",
+    cat: "rede",
+    ico: "🌱",
+    t: "Fio Terra e Haste de Aterramento",
+    alias: "O escoadouro de choques para o chão",
+    d: "Haste de cobre de 2 metros enterrada no solo úmido, conectada à carcaça do motor por um cabo verde. Se houver fuga de energia da bobina, ela escoa direto para a terra sem passar pelo operador.",
+    bad: "Sem fio terra, o motor funciona igualzinho, mas a carcaça de ferro fica eletrificada esperando alguém encostar para dar o choque.",
+    tip: "Nunca use arame de cerca ou cano velho como aterramento. Use haste cobreada própria com conector de latão bem apertado."
+  },
+  {
+    id: "curto_circuito",
+    cat: "rede",
+    ico: "💥",
+    t: "Curto-Circuito",
+    alias: "O contato direto e explosivo entre fases",
+    d: "Ocorre quando a camada de verniz dos fios derrete pelo calor ou é roída, fazendo fios vivos se tocarem sem nenhuma resistência intermediária.",
+    bad: "Estalo alto como tiro, faíscas, cheiro imediato de queimado e queda instantânea do disjuntor principal.",
+    tip: "Se o disjuntor desarmar no milissegundo em que bate a chave, não tente rearmar na teimosia: há curto na fiação ou nas bobinas."
+  },
+  {
+    id: "corrente_partida",
+    cat: "rede",
+    ico: "📈",
+    t: "Corrente de Partida (Ip / In)",
+    alias: "O pico de força no primeiro segundo",
+    d: "A quantidade de amperes que o motor puxa da tomada para acelerar o eixo parado. Em motores de indução, essa corrente é de 6 a 8 vezes maior que a corrente normal de trabalho.",
+    bad: "Faz as luzes do sítio piscarem amarelas e pode desarmar disjuntores mal dimensionados se o motor ligar muitas vezes por hora.",
+    tip: "Evite ligar e desligar máquinas pesadas a cada minuto. O calor acumulado no arranque repetido queima mais motores do que horas de trabalho contínuo."
+  },
+  {
+    id: "estrela_triangulo",
+    cat: "rede",
+    ico: "🔺",
+    t: "Ligação Estrela vs Triângulo (220V/380V)",
+    alias: "O fechamento dos bornes de tensão",
+    d: "A combinação dos 6 cabos internos do motor trifásico. Em 220V geralmente se conecta em Triângulo (3 pares de fios); em 380V conecta-se em Estrela (3 fios unidos e 3 na rede).",
+    bad: "Se ligar o motor fechado em 220V numa rede de 380V, ele explode em chamas em segundos! Se fechar para 380V e ligar em 220V, fica fraco e sem força.",
+    tip: "Confira sempre o desenho esquemático estampado na parte interna da tampa da caixa de ligação antes de apertar os parafusos."
+  },
+
+  // --- MECÂNICA & POLIAS ---
+  {
+    id: "escorregamento",
+    cat: "mecanica",
+    ico: "🔄",
+    t: "Escorregamento (Slip)",
+    alias: "O pequeno atraso que gera o arrasto",
+    d: "A diferença de rotação entre o campo magnético do estator (1.800 RPM) e o giro real do eixo sob carga (1.730 RPM). O rotor roda cerca de 3% a 5% mais devagar.",
+    bad: "Se o motor rodasse exatamente a 1.800 RPM junto com o campo, não haveria indução e a força de tração seria zero! É justamente esse atraso que cria o arrasto mecânico.",
+    tip: "Motor de 4 polos em vazio (sem correia) gira a ~1.780 RPM; botou carga cheia de serviço, cai para ~1.730 RPM, o que é totalmente normal."
+  },
+  {
+    id: "correia",
+    cat: "mecanica",
+    ico: "📏",
+    t: "Perfil de Correia (Tipo A, B, C e V)",
+    alias: "A transmissão de borracha trapezoidal",
+    d: "Cintas de borracha reforçada com lonas em formato de cunha (V). O perfil A tem 13 mm de topo e o perfil B tem 17 mm, assentando nas canaletas das polias.",
+    bad: "Correia frouxa patina, esquenta e queima pó preto no chão; correia esticada como corda de violão mói os rolamentos dianteiros e entorta o eixo.",
+    tip: "Aperte o meio da correia com o polegar: ela deve afundar apenas de 1 a 2 cm. Use a ferramenta 'Casamento de Polias' no app para calcular o tamanho."
+  },
+  {
+    id: "desbalanceamento",
+    cat: "mecanica",
+    ico: "⚖️",
+    t: "Desbalanceamento Dinâmico",
+    alias: "A marreta invisível que faz o motor pular",
+    d: "Acontece quando a faca da ensiladeira quebra uma ponta, o disco de serra perde pastilha ou terra seca gruda de um lado só da polia de ferro.",
+    bad: "A 1.750 ou 3.500 RPM, qualquer grama de diferença de peso vira uma força centrífuga destruidora. O motor vibra, afrouxa parafusos e arrebenta rolamentos.",
+    tip: "Se sentir formigamento nos pés ao pisar perto da bancada da máquina, desligue e balanceie as facas e lâminas aos pares com balança."
+  },
+  {
+    id: "chaveta",
+    cat: "mecanica",
+    ico: "🔩",
+    t: "Chaveta e Rasgo de Eixo",
+    alias: "A trava de aço contra patinamento",
+    d: "Barra de aço retangular maciça que se encaixa metade no rasgo usinado do eixo do motor e metade no rasgo da polia, garantindo que o eixo puxe a polia sem deslizar.",
+    bad: "Se a chaveta estiver com folga ou gasta, a cada partida ela dá um tranco que vai alargando o rasgo até espanar o eixo de vez.",
+    tip: "Nunca monte polia sem chaveta confiando apenas no parafuso de aperto Allen na ponta: ele vai patinar e destruir o eixo."
+  },
+  {
+    id: "sentido_giro",
+    cat: "mecanica",
+    ico: "🔀",
+    t: "Sentido de Rotação",
+    alias: "Como mudar o lado que o motor gira",
+    d: "O sentido de giro (horário ou anti-horário). Se ligar invertido, a bomba não puxa água e o picador tenta cuspir a cana para fora em vez de puxar.",
+    bad: "Pode danificar mecanismos mecânicos com rosca e provocar acidentes graves.",
+    tip: "No trifásico, basta trocar quaisquer 2 fios da rede entre si (ex.: fio azul pelo preto). No monofásico, inverta os fios 5 e 6 da bobina auxiliar na caixa."
+  },
+
+  // --- TESTES & OFICINA ---
+  {
+    id: "megometro",
+    cat: "testes",
+    ico: "⚡",
+    t: "Megômetro (Megger)",
+    alias: "O caçador de vazamentos nas bobinas",
+    d: "Aparelho profissional do eletricista que injeta uma tensão de teste de 500V ou 1.000V com corrente baixíssima para medir a resistência do isolamento de verniz das bobinas contra a carcaça.",
+    bad: "Se a leitura der abaixo de 1 Megaohm (MΩ), o motor está com umidade ou verniz degradado e não pode ser energizado na rede sob risco de curto e choque.",
+    tip: "Motor que pegou chuva pode ser recuperado: coloque-o em uma estufa ou sob uma lâmpada incandescente de 100W por 24h para evaporar a umidade antes de testar."
+  },
+  {
+    id: "amperimetro",
+    cat: "testes",
+    ico: "🧲",
+    t: "Alicate Amperímetro",
+    alias: "O medidor de esforço sem cortar fios",
+    d: "Ferramenta que possui uma garra plástica que se abre para abraçar um único cabo elétrico, medindo pelo magnetismo quantos Amperes o motor está consumindo naquele exato momento.",
+    bad: "Se o valor medido for maior que a corrente da plaqueta (A), a máquina está engasgada de carga, com correia travando ou subtensão na rede.",
+    tip: "Nunca abrace os dois fios da tomada juntos na garra! O campo de um anula o outro e a leitura dá zero. Abrace um único fio por vez."
+  },
+  {
+    id: "multimetro",
+    cat: "testes",
+    ico: "📟",
+    t: "Multímetro Digital",
+    alias: "O canivete suíço da bancada elétrica",
+    d: "Aparelho eletrônico portátil que mede Volts (tensão da tomada), Ohms (resistência dos fios) e continuidade (o famoso 'apito' sonoro que avisa se o fio está inteiro).",
+    bad: "Permite saber na hora se a energia do galpão está em 220V ou caiu para 180V antes de culpar o motor.",
+    tip: "Use a escala do 'apito' (continuidade) para testar se o platinado da chave centrífuga fechou ou se a bobina não quebrou por dentro."
+  },
+  {
+    id: "verniz",
+    cat: "testes",
+    ico: "🧪",
+    t: "Verniz Isolante Térmico (Classe F)",
+    alias: "A capa microscópica do cobre",
+    d: "Resina especial transparente e ultra-resistente que encapa cada fio de cobre do motor. É essa película finíssima que impede que um fio encoste no fio ao lado.",
+    bad: "O calor constante acima de 155 °C resseca e descasca o verniz. O cobre cru entra em contato e dá o curto-circuito.",
+    tip: "O cheiro de motor queimado é característico: parece esmalte de unhas frito na frigideira. Se sentir esse cheiro, desligue a chave geral na hora!"
+  }
+];
+

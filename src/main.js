@@ -1,5 +1,5 @@
 import './style.css';
-import { CAUSES, SYMPTOMS, TYPES, GRAV, PLACA, CHECK, MAQUINAS, TERMOS } from './data/knowledgeBase.js';
+import { CAUSES, SYMPTOMS, TYPES, GRAV, PLACA, CHECK, MAQUINAS, TERMOS, DICT_CATS } from './data/knowledgeBase.js';
 import { mascot, boltIco } from './components/mascot.js';
 import { parsePlateText } from './utils/plateParser.js';
 
@@ -28,7 +28,10 @@ const S = {
     detected: null,
     rawText: "",
     errMsg: ""
-  }
+  },
+  // Dicionário do Eletricista
+  dictCat: "todos",
+  dictSearch: ""
 };
 
 const $app = document.getElementById("app");
@@ -800,17 +803,101 @@ function viewGira() {
 
 /* ---------- SKILL: Dicionário do Eletricista ---------- */
 function viewDicionario() {
+  const query = (S.dictSearch || "").trim().toLowerCase();
+  const cat = S.dictCat || "todos";
+
+  const filtered = TERMOS.filter(x => {
+    const matchesCat = cat === "todos" || x.cat === cat;
+    if (!matchesCat) return false;
+    if (!query) return true;
+    return (
+      x.t.toLowerCase().includes(query) ||
+      (x.alias && x.alias.toLowerCase().includes(query)) ||
+      (x.d && x.d.toLowerCase().includes(query)) ||
+      (x.bad && x.bad.toLowerCase().includes(query)) ||
+      (x.tip && x.tip.toLowerCase().includes(query))
+    );
+  });
+
   return `
   <h1 class="display" tabindex="-1">Dicionário do Eletricista</h1>
-  <p class="lead">Para você conversar de igual para igual quando comprar peças ou falar com a oficina:</p>
-  <div class="stack">
-    ${TERMOS.map(x => `
-      <div class="card" style="padding:14px">
-        <h3 class="display" style="font-size:1.25rem; color:#0A2540">${x.t}</h3>
-        <p style="margin:6px 0 0; font-size:.95rem">${x.d}</p>
-      </div>
+  <p class="lead">30 termos práticos explicados em bom português pra você conversar de igual pra igual na oficina e na loja de peças:</p>
+
+  <div class="dict-search-box">
+    <input
+      type="search"
+      class="dict-search-input"
+      placeholder="🔍 Buscar termo (ex.: capacitor, relé, escorregamento...)"
+      value="${escapeHtml(S.dictSearch)}"
+      data-act="search-dict"
+      aria-label="Buscar termo no dicionário"
+    >
+    ${S.dictSearch ? `<button class="dict-search-clear" data-act="clear-dict" title="Limpar busca">✕</button>` : ""}
+  </div>
+
+  <div class="dict-pills" role="tablist" aria-label="Categorias do dicionário">
+    ${DICT_CATS.map(c => `
+      <button
+        class="dict-pill ${cat === c.id ? "active" : ""}"
+        data-act="set-dict-cat"
+        data-k="${c.id}"
+        role="tab"
+        aria-selected="${cat === c.id}"
+      >
+        <span>${c.ico}</span>
+        <span>${c.t}</span>
+      </button>
     `).join("")}
-  </div>`;
+  </div>
+
+  <div class="dict-count">
+    Mostrando <strong>${filtered.length}</strong> de ${TERMOS.length} termos ${cat !== "todos" ? `em <em>${DICT_CATS.find(c => c.id === cat)?.t}</em>` : ""}
+  </div>
+
+  ${filtered.length === 0 ? `
+    <div class="card" style="text-align:center; padding:30px 16px; margin-top:14px">
+      ${mascot("worried", "sm")}
+      <h3 class="display" style="font-size:1.25rem; margin:10px 0 6px">Nenhum termo encontrado</h3>
+      <p style="margin:0 0 14px; font-size:.92rem; color:var(--on-bg-soft)">Não achamos nada com "${escapeHtml(S.dictSearch)}".</p>
+      <button class="btn btn-yellow" data-act="clear-dict"><span class="t">Limpar filtro de busca</span></button>
+    </div>
+  ` : `
+    <div class="stack">
+      ${filtered.map(x => {
+        const catInfo = DICT_CATS.find(c => c.id === x.cat);
+        return `
+        <article class="dict-card">
+          <div class="dict-card-head">
+            <div class="dict-card-ico" aria-hidden="true">${x.ico}</div>
+            <div class="dict-card-title">
+              <h3 class="display">${x.t}</h3>
+              ${x.alias ? `<span class="dict-card-alias">${x.alias}</span>` : ""}
+              ${catInfo ? `<span class="dict-cat-tag">${catInfo.ico} ${catInfo.t}</span>` : ""}
+            </div>
+          </div>
+
+          <div class="dict-box what">
+            <span class="dict-box-lbl">💡 O que é na prática</span>
+            ${x.d}
+          </div>
+
+          ${x.bad ? `
+          <div class="dict-box bad">
+            <span class="dict-box-lbl">⚠️ Como saber se estragou</span>
+            ${x.bad}
+          </div>
+          ` : ""}
+
+          ${x.tip ? `
+          <div class="dict-box tip">
+            <span class="dict-box-lbl">🔧 Dica de ouro do técnico</span>
+            ${x.tip}
+          </div>
+          ` : ""}
+        </article>`;
+      }).join("")}
+    </div>
+  `}`;
 }
 
 /* ---------- Resumo ---------- */
@@ -938,6 +1025,13 @@ document.addEventListener("click", e => {
   else if (a === "set-rpm") { S.rpmMotor = +b.dataset.v; render(true); }
   else if (a === "set-fio") { S.fioMm = +b.dataset.v; render(true); }
   else if (a === "set-cv") { S.potCv = +b.dataset.v; render(true); }
+  else if (a === "set-dict-cat") { S.dictCat = b.dataset.k; render(true); }
+  else if (a === "clear-dict") {
+    S.dictSearch = "";
+    render(true);
+    const inp = document.querySelector(".dict-search-input");
+    if (inp) inp.focus();
+  }
 });
 
 document.addEventListener("input", e => {
@@ -946,6 +1040,16 @@ document.addEventListener("input", e => {
   if (el.dataset.act === "slide-motor") { S.dMotor = +el.value; render(true); }
   else if (el.dataset.act === "slide-maq") { S.dMaq = +el.value; render(true); }
   else if (el.dataset.act === "slide-dist") { S.distM = +el.value; render(true); }
+  else if (el.dataset.act === "search-dict") {
+    S.dictSearch = el.value;
+    render(true);
+    const inp = document.querySelector(".dict-search-input");
+    if (inp) {
+      inp.focus();
+      const len = inp.value.length;
+      inp.setSelectionRange(len, len);
+    }
+  }
 });
 
 document.addEventListener("change", e => {
