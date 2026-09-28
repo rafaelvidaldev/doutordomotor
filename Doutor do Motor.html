@@ -176,8 +176,7 @@ details .in p{margin:6px 0}
 .placa .screw.tr{top:8px; right:8px; transform:rotate(70deg)}
 .placa .screw.bl{bottom:8px; left:8px; transform:rotate(40deg)}
 .placa .screw.br{bottom:8px; right:8px; transform:rotate(15deg)}
-.placa-brand{text-align:center; font-family:'Lilita One',Arial,sans-serif; font-size:1.15rem; color:#0A2540; letter-spacing:.03em; margin:2px 20px 2px}
-.placa-sub{text-align:center; font-size:.78rem; font-weight:700; color:#333; margin-bottom:12px}
+.placa-brand{text-align:center; font-family:'Lilita One',Arial,sans-serif; font-size:1.15rem; color:#0A2540; letter-spacing:.03em; margin:2px 20px 12px}
 .fields{display:grid; grid-template-columns:repeat(3,1fr); gap:8px}
 .field{
   font:inherit; font-weight:700; font-size:.95rem; background:#fff; border:2.5px solid var(--line); border-radius:8px;
@@ -916,7 +915,6 @@ function viewPlaca(){
     <span class="screw tl"></span><span class="screw tr"></span>
     <span class="screw bl"></span><span class="screw br"></span>
     <p class="placa-brand">MOTOR DE INDUÇÃO TRIFÁSICO</p>
-    <p class="placa-sub">INDÚSTRIA BRASILEIRA • PADRÃO ABNT / NBR 17094</p>
     <div class="fields">
       ${PLACA.map(p => `<button class="field ${S.placaField===p.k?"on":""}" data-act="field" data-k="${p.k}" aria-pressed="${S.placaField===p.k}">${p.k}</button>`).join("")}
     </div>
